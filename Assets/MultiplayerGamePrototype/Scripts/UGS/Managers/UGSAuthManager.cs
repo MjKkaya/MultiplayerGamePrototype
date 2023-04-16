@@ -1,18 +1,90 @@
-using System.Collections;
-using System.Collections.Generic;
+using MultiplayerGamePrototype.Core;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class UGSAuthManager : MonoBehaviour
+
+namespace MultiplayerGamePrototype.UGS.Managers
 {
-    // Start is called before the first frame update
-    void Start()
+    public class UGSAuthManager : ManagerSingleton<UGSAuthManager>
     {
-        
-    }
+        public static UnityAction ActionOnCompletedSignIn;
+        public static string MyPlayerId;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+
+        public override void Init()
+        {
+            base.Init();
+            Debug.Log("UGSAuthManager-Init");
+            UGSManager.ActionOnCompletedInitialize += OnCompletedInitialize;
+        }
+
+        public async void SignInAnonymouslyAsync()
+        {
+            Debug.Log("UGSAuthManager-SignInAnonymouslyAsync");
+            try
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
+            catch (AuthenticationException ex)
+            {
+               
+                Debug.Log($"UGSAuthManager-SignInAnonymouslyAsync-ex:{ex}");
+            }
+            catch (RequestFailedException exception)
+            {
+                Debug.Log($"UGSAuthManager-SignInAnonymouslyAsync-exception:{exception}");
+            }
+        }
+
+
+        private void SetupEvents(bool isActive)
+        {
+            if (isActive)
+            {
+                AuthenticationService.Instance.SignedIn += OnSignedIn;
+                AuthenticationService.Instance.SignInFailed += OnSignInFailed;
+            }
+            else
+            {
+                AuthenticationService.Instance.SignedIn -= OnSignedIn;
+                AuthenticationService.Instance.SignInFailed -= OnSignInFailed;
+            }
+        }
+
+
+        #region Events
+
+        private void OnCompletedInitialize()
+        {
+            SetupEvents(true);
+            SignInAnonymouslyAsync();
+        }
+
+        private void OnDestroy()
+        {
+            UGSManager.ActionOnCompletedInitialize -= OnCompletedInitialize;
+            SetupEvents(false);
+        }
+
+
+        #region AuthenticationService Events
+
+        private void OnSignedIn()
+        {
+            MyPlayerId = AuthenticationService.Instance.PlayerId;
+            Debug.Log($"UGSAuthManager-OnSignedIn-MyPlayerId:{MyPlayerId}");
+            ActionOnCompletedSignIn?.Invoke();
+        }
+
+        private void OnSignInFailed(RequestFailedException requestFailedException)
+        {
+            Debug.Log($"UGSAuthManager-OnSignInFailed:{requestFailedException}");
+        }
+
+        #endregion
+
+        #endregion
     }
 }

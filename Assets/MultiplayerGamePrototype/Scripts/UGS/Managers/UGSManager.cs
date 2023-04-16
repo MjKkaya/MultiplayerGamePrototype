@@ -1,18 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
+using MultiplayerGamePrototype.Core;
+using Unity.Services.Core;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class UGSManager : MonoBehaviour
+
+namespace MultiplayerGamePrototype.UGS.Managers
 {
-    // Start is called before the first frame update
-    void Start()
+    public class UGSManager : ManagerSingleton<UGSManager>
     {
-        
-    }
+        public static UnityAction ActionOnCompletedInitialize;
+        public static UnityAction ActionOnFailedInitialize;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [SerializeField] private ManagerBase[] m_UGSSubManagers;
+
+
+        public override void Init()
+        {
+            base.Init();
+            foreach (ManagerBase subManager in m_UGSSubManagers)
+            {
+                subManager.Init();
+            }
+            InitializeUnityServiceAsync();
+        }
+
+        private async void InitializeUnityServiceAsync()
+        {
+            try
+            {
+                await UnityServices.InitializeAsync();
+                Debug.Log($"UGSManager-InitializeUnityServiceAsync-State:{UnityServices.State}");
+                if (UnityServices.State == ServicesInitializationState.Initialized)
+                    ActionOnCompletedInitialize?.Invoke();
+                else
+                    ActionOnFailedInitialize?.Invoke();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log($"UGSManager-InitializeUnityServiceAsync-ex:{ex}");
+                ActionOnFailedInitialize?.Invoke();
+            }
+        }
     }
 }
