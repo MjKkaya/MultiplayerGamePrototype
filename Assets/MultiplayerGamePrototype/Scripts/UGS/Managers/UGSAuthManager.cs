@@ -9,8 +9,14 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSAuthManager : ManagerSingleton<UGSAuthManager>
     {
+        public static string m_MyPlayerId;
+        public static string MyPlayerId{
+            get{
+                return m_MyPlayerId;
+            }
+        }
+
         public static UnityAction ActionOnCompletedSignIn;
-        public static string MyPlayerId;
 
 
         public override void Init()
@@ -73,7 +79,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnSignedIn()
         {
-            MyPlayerId = AuthenticationService.Instance.PlayerId;
+            m_MyPlayerId = AuthenticationService.Instance.PlayerId;
             Debug.Log($"UGSAuthManager-OnSignedIn-MyPlayerId:{MyPlayerId}");
             ActionOnCompletedSignIn?.Invoke();
         }

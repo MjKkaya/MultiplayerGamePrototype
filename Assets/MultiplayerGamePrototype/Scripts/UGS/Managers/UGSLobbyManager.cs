@@ -1,5 +1,7 @@
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.UGS.LobbyController;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Lobbies;
@@ -22,83 +24,112 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         public static Action<List<LobbyPlayerJoined>> ActionOnPlayerJoined;
         public static Action ActionOnJoinedLobby;
+        public static Action ActionOnChangedLobbyData;
+        public static Action ActionOnChangedMyPlayerData;
 
         private LobbyEventCallbacks m_LobbyEventCallbacks;
 
 
+        private async Task BindLobby(string lobbyID)
+        {
+            Debug.Log($"UGSLobbyManager-BindLobby-lobbyID:{lobbyID}");
+            m_LobbyEventCallbacks = new LobbyEventCallbacks();
+            m_LobbyEventCallbacks.LobbyChanged += OnLobbyChanged;
+            m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
+            m_LobbyEventCallbacks.DataChanged += OnDataChanged;
+            ILobbyEvents lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
+        }
+
+
         #region LobbyService Methods
 
-        public async Task<bool> CreateLobbyAsync(string lobbyName, int maxPlayers, CreateLobbyOptions options)
+        public async Task<bool> CreateLobbyAsync(string lobbyName, string username)
         {
             try
             {
-                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, 100, UGSLobbyDataController.CreateLobbyOption(username));
                 Debug.Log($"UGSLobbyManager-CreateLobbyAsync-LobbyId:{m_CurrentLobby.Id}");
                 //StartHeartBeat();
                 await BindLobby(m_CurrentLobby.Id);
+                StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
                 ActionOnJoinedLobby?.Invoke();
                 return true;
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"UGSLobbyManager-CreateLobbyAsync-ex:{ex}");
-                //ActionOnFailedCreateLobby?.Invoke();
+                return false;
+            }
+        }
+
+        public async Task<bool> QuickJoinLobbyAsync(string username)
+        {
+            try
+            {
+                QuickJoinLobbyOptions options = new()
+                {
+                    Player = UGSLobbyDataController.CreateLobbyPlayer(username)
+                };
+
+                m_CurrentLobby = await Lobbies.Instance.QuickJoinLobbyAsync(options);
+                await BindLobby(m_CurrentLobby.Id);
+                ActionOnJoinedLobby?.Invoke();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-QuickJoinLobbyAsync-ex: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateLobbyDataAsync(UpdateLobbyOptions lobbyOptions)
+        {
+            try
+            {
+                await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-UpdateLobbyData-ex:{ex}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateMyPlayerDataAsync(UpdatePlayerOptions playerOptions)
+        {
+            Debug.Log("UGSLobbyManager-UpdateMyPlayerDataAsync");
+            try
+            {
+                m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(m_CurrentLobby.Id, UGSAuthManager.MyPlayerId, playerOptions);
+                ActionOnChangedMyPlayerData?.Invoke();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-UpdateMyPlayerDataAsync-ex:{ex}");
                 return false;
             }
         }
 
         #endregion
 
-        private async Task BindLobby(string lobbyID)
-        {
-            Debug.Log($"UGSLobbyManager-BindLobby-lobbyID:{lobbyID}");
-            m_LobbyEventCallbacks = new LobbyEventCallbacks();
-            //m_LobbyEventCallbacks.DataAdded += OnDataAdded;
-            //m_LobbyEventCallbacks.DataChanged += OnDataChanged;
-            //m_LobbyEventCallbacks.DataRemoved += DataRemoved;
-            //m_LobbyEventCallbacks.LobbyChanged += OnLobbyChanged;
-            //m_LobbyEventCallbacks.LobbyDeleted += OnLobbyDeleted;
-            //m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
-            //m_LobbyEventCallbacks.PlayerDataAdded += OnPlayerDataAdded;
-            //m_LobbyEventCallbacks.PlayerDataChanged += OnPlayerDataChanged;
-            //m_LobbyEventCallbacks.PlayerDataRemoved += OnPlayerDataRemoved;
-            m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
-            //m_LobbyEventCallbacks.PlayerLeft += OnPlayerLeft;
-
-            ILobbyEvents lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
-        }
-
 
         #region HeartBbeat
-        /*
-        async Task<Lobby> CreateLobbyWithHeartbeatAsync()
-        {
-            string lobbyName = "test lobby";
-            int maxPlayers = 4;
-            CreateLobbyOptions options = new CreateLobbyOptions();
-
-            // Lobby parameters code goes here...
-            // See 'Creating a Lobby' for example parameters
-            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
-
-            // Heartbeat the lobby every 15 seconds.
-            StartCoroutine(HeartbeatLobbyCoroutine(lobby.Id, 15));
-            return lobby;
-        }
-
+        
         IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float waitTimeSeconds)
         {
+            Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-lobbyId:{lobbyId}");
             var delay = new WaitForSecondsRealtime(waitTimeSeconds);
-
             while (true)
             {
+                Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-Continue-lobbyId:{lobbyId}");
                 LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
                 yield return delay;
             }
-
-
         }
-        */
+        
         #endregion
 
 
@@ -115,6 +146,24 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
             Debug.Log($"UGSLobbyManager-OnPlayerJoined-Players.Count:{m_CurrentLobby.Players.Count}");
             ActionOnPlayerJoined?.Invoke(joinedPlayers);
+        }
+
+        private void OnLobbyChanged(ILobbyChanges lobbyChanges)
+        {
+            Debug.Log($"UGSLobbyManager-OnLobbyChanged-Players.Count:{m_CurrentLobby.Players.Count}");
+            if (!lobbyChanges.LobbyDeleted)
+                lobbyChanges.ApplyToLobby(m_CurrentLobby);
+            Debug.Log($"UGSLobbyManager-OnLobbyChanged-Players.Count:{m_CurrentLobby.Players.Count}");
+        }
+
+        private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> changedData)
+        {
+            Debug.Log($"UGSLobbyManager-OnDataChanged-Count:" + changedData.Count);
+            foreach (var item in changedData)
+            {
+                Debug.Log($"UGSLobbyManager-OnDataChanged-Key:{item.Key}, lobbyValue=> {item.Value.Value.Value}");
+            }
+            ActionOnChangedLobbyData?.Invoke();
         }
 
         #endregion

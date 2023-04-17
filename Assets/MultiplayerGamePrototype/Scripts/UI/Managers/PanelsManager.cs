@@ -8,7 +8,8 @@ namespace MultiplayerGamePrototype.UI.Managers
     public enum PanelTypes
     {
         Initialize = 0,
-        MainMenu = 1
+        MainMenu = 1,
+        GameMode = 2
     }
 
 
@@ -18,6 +19,9 @@ namespace MultiplayerGamePrototype.UI.Managers
         [SerializeField] private UIBasePanel[] m_Panels;
 
 
+        /// <summary>
+        ///All panels preparing.
+        /// </summary>
         public override void Init()
         {
             base.Init();
@@ -29,6 +33,9 @@ namespace MultiplayerGamePrototype.UI.Managers
         }
 
 
+        /// <summary>
+        /// First beginning panel will show when app launched.
+        /// </summary>
         private void Start()
         {
             m_Panels[(int)PanelTypes.Initialize].Show();
