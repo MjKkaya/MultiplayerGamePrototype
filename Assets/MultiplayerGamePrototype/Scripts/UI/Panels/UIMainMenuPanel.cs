@@ -17,6 +17,7 @@ namespace MultiplayerGamePrototype.UI.Panels
 
 
         [SerializeField] TMP_InputField m_UsernameInput;
+        [SerializeField] TMP_InputField m_LobbyCodeInput;
         [SerializeField] Button m_CreateGameButton;
         [SerializeField] Button m_JoinGameButton;
 
@@ -36,7 +37,7 @@ namespace MultiplayerGamePrototype.UI.Panels
             if (username != null)
             {
                 SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Instance.CreateLobbyAsync("Lobby-1", Username);
+                bool isSucceed = await UGSLobbyManager.Instance.CreateLobbyAsync(Username);
                 if(!isSucceed)
                     SetInteractablePanelButtons(true);
             }
@@ -45,12 +46,20 @@ namespace MultiplayerGamePrototype.UI.Panels
         private async void JoinLobby()
         {
             string username = GetUsername();
-            if (username != null)
+            string lobbyCode = GetLobbyCode();
+            if (username != null && lobbyCode != null)
             {
                 SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Instance.QuickJoinLobbyAsync(Username);
+                bool isSucceed = await UGSLobbyManager.Instance.JoinLobbyByCodeAsync(lobbyCode, username);
                 if (!isSucceed)
-                    CreateLobby();
+                    SetInteractablePanelButtons(true);
+
+
+
+                //bool isSucceed = await UGSLobbyManager.Instance.QuickJoinLobbyAsync(Username);
+                //if (!isSucceed)
+                //    CreateLobby();
+                //await UGSLobbyManager.Instance.GetLobbyListAsync();
             }
         }
 
@@ -72,6 +81,20 @@ namespace MultiplayerGamePrototype.UI.Panels
                 return null;
             }
         }
+
+        private string GetLobbyCode()
+        {
+            if (m_LobbyCodeInput.text.Length > 0)
+            {
+                return m_LobbyCodeInput.text;
+            }
+            else
+            {
+                m_LobbyCodeInput.transform.DOShakePosition(0.75f, 30 ,100, 360);
+                return null;
+            }
+        }
+
 
 
         #region Events

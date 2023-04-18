@@ -728,7 +728,7 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 66941640-db2a-4b4c-b625-14763d99af5e
+  cloudProjectId: ff2cb053-355a-4dd0-8f22-3b0228280f0b
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: MultiplayerGamePrototype

@@ -1,4 +1,4 @@
-using MultiplayerGamePrototype.UGS.LobbyController;
+using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.UGS.Managers;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,13 @@ namespace MultiplayerGamePrototype.UI.Popups
             SetDropdowns();
         }
 
+        public override void Show()
+        {
+            m_BulletColorDropdown.value = (int)UGSPlayerDataController.GetMyPlayerBulletColorType();
+            m_BulletSizeDropdown.value = (int)UGSPlayerDataController.GetMyPlayerBulletSizeType();
+            base.Show();
+        }
+
         private void SetDropdowns()
         {
             m_BulletColorDropdown.ClearOptions();
@@ -46,7 +53,7 @@ namespace MultiplayerGamePrototype.UI.Popups
             string bulletSize = ((BulletSizeTypes)m_BulletSizeDropdown.value).ToString();
             Debug.Log($"UIChangePlayerGameModePopup-UpdateMyBulletModeData:{bulletColor}-{bulletSize}");
 
-            bool isSucceed = await UGSLobbyManager.Instance.UpdateMyPlayerDataAsync(UGSLobbyDataController.CreateNewPlayerBulletData(bulletColor, bulletSize));
+            bool isSucceed = await UGSLobbyManager.Instance.UpdateMyPlayerDataAsync(UGSPlayerDataController.CreateNewPlayerBulletData(bulletColor, bulletSize));
             m_ChangeButton.interactable = true;
             if(isSucceed)
                 Hide();

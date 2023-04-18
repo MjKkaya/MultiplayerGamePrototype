@@ -9,7 +9,8 @@ namespace MultiplayerGamePrototype.UI.Managers
     {
         Initialize = 0,
         MainMenu = 1,
-        GameMode = 2
+        GameMode = 2,
+        GamePlayerScore = 3
     }
 
 
@@ -40,5 +41,16 @@ namespace MultiplayerGamePrototype.UI.Managers
         {
             m_Panels[(int)PanelTypes.Initialize].Show();
         }
+
+        public void ShowPanel(PanelTypes panelTypes)
+        {
+            m_Panels[(int)panelTypes].Show();
+        }
+
+        public void HidePanel(PanelTypes panelTypes)
+        {
+            m_Panels[(int)panelTypes].Hide();
+        }
+
     }
 }
