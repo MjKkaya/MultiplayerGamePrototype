@@ -37,7 +37,7 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
         #region Username
 
-        public static string GetPlayerUsernameData(Player player)
+        public static string GetPlayerUsername(Player player)
         {
             string username = string.Empty;
             PlayerDataObject playerDataObject;

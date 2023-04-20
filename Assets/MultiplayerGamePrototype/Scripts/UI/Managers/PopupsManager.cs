@@ -7,7 +7,8 @@ namespace MultiplayerGamePrototype.UI.Managers
 {
     public enum PopupTypes
     {
-        PlayerGameModeChange = 0
+        PlayerGameModeChange = 0,
+        ImmobilizedPlayer = 1
     }
 
 

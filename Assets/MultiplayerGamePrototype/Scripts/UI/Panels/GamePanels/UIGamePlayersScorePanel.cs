@@ -46,14 +46,18 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
                 if (!m_ScoreItems.ContainsKey(newPlayerId))
                 {
                     playerScore = UGSLobbyDataController.GetPlayerScoreStat(newPlayerId);
-                    CreateScoreStatItem(UGSLobbyManager.Instance.GetPlayer(newPlayerId), playerScore);
+                    CreateScoreStatItem(UGSLobbyManager.Singleton.GetPlayer(newPlayerId), playerScore);
                 }
             }
         }
 
         private void CreateScoreStatItem(Player player, int score)
         {
-            string username = UGSPlayerDataController.GetPlayerUsernameData(player);
+            if(player == null){
+                Debug.Log("UIGamePlayersScorePanel-CreateScoreStatItem-player is null!");
+                return;
+            }
+            string username = UGSPlayerDataController.GetPlayerUsername(player);
             UIPlayerScoreStatItem statItem = Instantiate(m_ScoreItemPrefab, m_ScoreItemContainer);
             statItem.Init(player.Id, username, score);
             m_ScoreItems.TryAdd(player.Id, statItem);
@@ -76,25 +80,16 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         /// Dictionary item has playerIds and new totol score.
         /// </summary>
         /// <param name="changedDataDict"></param>
-        private void OnChangedPlayersStatData(Dictionary<string, string> changedPlayerDatas)
+        private void OnChangedPlayersStatData(string playerId, string newScore)
         {
-            string playerId;
             int playerScore = 0;
-            foreach (var item in changedPlayerDatas)
-            {
-                playerId = item.Key;
-                int.TryParse(item.Value, out playerScore);
-                Debug.Log($"UIGamePlayersScorePanel-OnChangedPlayersStatData-playerId:{playerId}, playerScore:{playerScore}");
+            int.TryParse(newScore, out playerScore);
+            Debug.Log($"UIGamePlayersScorePanel-OnChangedPlayersStatData-playerId:{playerId}, playerScore:{playerScore}");
 
-                if(m_ScoreItems.ContainsKey(item.Key))
-                {
-                    m_ScoreItems[item.Key].UpdateScore(item.Value);
-                }
-                else
-                {
-                    CreateScoreStatItem(UGSLobbyManager.Instance.GetPlayer(playerId), playerScore);
-                }
-            }
+            if(m_ScoreItems.ContainsKey(playerId))
+                m_ScoreItems[playerId].UpdateScore(playerScore);
+            else
+                CreateScoreStatItem(UGSLobbyManager.Singleton.GetPlayer(playerId), playerScore);
         }
 
         private void OnDestroy()

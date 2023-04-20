@@ -53,7 +53,7 @@ namespace MultiplayerGamePrototype.UI.Popups
             string bulletSize = ((BulletSizeTypes)m_BulletSizeDropdown.value).ToString();
             Debug.Log($"UIChangePlayerGameModePopup-UpdateMyBulletModeData:{bulletColor}-{bulletSize}");
 
-            bool isSucceed = await UGSLobbyManager.Instance.UpdateMyPlayerDataAsync(UGSPlayerDataController.CreateNewPlayerBulletData(bulletColor, bulletSize));
+            bool isSucceed = await UGSLobbyManager.Singleton.UpdateMyPlayerDataAsync(UGSPlayerDataController.CreateNewPlayerBulletData(bulletColor, bulletSize));
             m_ChangeButton.interactable = true;
             if(isSucceed)
                 Hide();

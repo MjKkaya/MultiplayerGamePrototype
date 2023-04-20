@@ -34,11 +34,12 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
         public static readonly string LOBBY_DATA_BULLET_COLOR = "LD_BC";
         public static readonly string LOBBY_DATA_BULLET_SIZE = "LD_BS";
+        public static readonly string LOBBY_DATA_RELAY_JOIN_CODE = "LD_RJC";
 
         #endregion
 
 
-        public static CreateLobbyOptions CreateLobbyOption(string username)
+        public static CreateLobbyOptions CreateBaseLobbyData(string username)
         {
             Dictionary<string, DataObject> data = CreateRandomLobbyBulletData();
             //This data is using for player's point stat.
@@ -52,6 +53,38 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
             return lobbyOptions;
         }
+
+
+        #region Relay Join Code
+
+        public static UpdateLobbyOptions CreateRelayJoinCodeData(string relayJoinCode)
+        {
+            Debug.Log($"UGSLobbyDataController-CreateRelayJoinCodeData-relayJoinCode:{relayJoinCode}");
+
+            UpdateLobbyOptions lobbyOptions = new()
+            {
+                Data = new Dictionary<string, DataObject>() { { LOBBY_DATA_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) } }
+            };
+
+            return lobbyOptions;
+        }
+
+        public static string GetRelayJoinCode()
+        {
+            string joinCode = null;
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+
+            if (currentLobby != null)
+            {
+                DataObject dataObject;
+                currentLobby.Data.TryGetValue(LOBBY_DATA_RELAY_JOIN_CODE, out dataObject);
+                joinCode = dataObject.Value;
+            }
+
+            return joinCode;
+        }
+
+        #endregion
 
 
         #region Bullet Type

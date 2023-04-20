@@ -37,7 +37,7 @@ namespace MultiplayerGamePrototype.UI.Panels
             if (username != null)
             {
                 SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Instance.CreateLobbyAsync(Username);
+                bool isSucceed = await UGSLobbyManager.Singleton.CreateLobbyAsync(Username);
                 if(!isSucceed)
                     SetInteractablePanelButtons(true);
             }
@@ -50,7 +50,7 @@ namespace MultiplayerGamePrototype.UI.Panels
             if (username != null && lobbyCode != null)
             {
                 SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Instance.JoinLobbyByCodeAsync(lobbyCode, username);
+                bool isSucceed = await UGSLobbyManager.Singleton.JoinLobbyByCodeAsync(lobbyCode, username);
                 if (!isSucceed)
                     SetInteractablePanelButtons(true);
 

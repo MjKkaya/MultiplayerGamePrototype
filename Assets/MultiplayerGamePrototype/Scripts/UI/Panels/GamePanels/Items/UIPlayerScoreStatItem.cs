@@ -17,13 +17,11 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         {
             m_PlayerId = playerId;
             m_UsernameText.text = username;
-            m_ScoreText.text = score.ToString();
+            UpdateScore(score);
         }
 
-        public void UpdateScore(string scoreStr)
+        public void UpdateScore(int score)
         {
-            int score = 0;
-            int.TryParse(scoreStr, out score);
             m_ScoreText.text = score.ToString();
         }
     }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 
 namespace MultiplayerGamePrototype.UI.Panels.GamePanels
@@ -60,8 +61,7 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         private async void ChangeLobbyBulletMode()
         {
             m_ChangeGameBulletModeButton.interactable = false;
-            //await UGSLobbyManager.Instance.UpdateLobbyDataAsync(UGSLobbyDataController.CreateRandomLobbyBulletMode());
-            await UGSLobbyManager.Instance.UpdateLobbyDataAsync(UGSLobbyDataController.IncreasePlayerScoreStat(UGSAuthManager.MyPlayerId, 10));
+            await UGSLobbyManager.Singleton.UpdateLobbyDataAsync(UGSLobbyDataController.CreateRandomLobbyBulletMode());
             m_ChangeGameBulletModeButton.interactable = true;
         }
 
@@ -94,6 +94,7 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
                 m_ChangeMyBulletModeButton.onClick.RemoveAllListeners();
         }
 
+
         #region Button events
 
         private void OnButtonClickedChangeGameBulletMode()
@@ -103,15 +104,15 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
 
         private void OnButtonClickedChangeMyBulletMode()
         {
-            PopupsManager.Instance.ShowPopup(PopupTypes.PlayerGameModeChange);
+            PopupsManager.Singleton.ShowPopup(PopupTypes.PlayerGameModeChange);
         }
 
         private void OnButtonClickedStatsPanelControl()
         {
             if(!m_IsPlayerSocrePanelOpen)
-                PanelsManager.Instance.ShowPanel(PanelTypes.GamePlayerScore);
+                PanelsManager.Singleton.ShowPanel(PanelTypes.GamePlayerScore);
             else
-                PanelsManager.Instance.HidePanel(PanelTypes.GamePlayerScore);
+                PanelsManager.Singleton.HidePanel(PanelTypes.GamePlayerScore);
             m_IsPlayerSocrePanelOpen = !m_IsPlayerSocrePanelOpen;
         }
 

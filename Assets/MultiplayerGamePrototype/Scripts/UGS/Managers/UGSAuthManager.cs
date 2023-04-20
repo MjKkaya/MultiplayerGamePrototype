@@ -9,12 +9,14 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSAuthManager : ManagerSingleton<UGSAuthManager>
     {
-        public static string m_MyPlayerId;
+        private static string m_MyPlayerId;
         public static string MyPlayerId{
             get{
                 return m_MyPlayerId;
             }
         }
+
+        public static string MyUsername;
 
         public static UnityAction ActionOnCompletedSignIn;
 

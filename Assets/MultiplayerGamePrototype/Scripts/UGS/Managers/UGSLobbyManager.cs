@@ -7,12 +7,23 @@ using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSLobbyManager : ManagerSingleton<UGSLobbyManager>
     {
+        private static readonly int LOBBY_MAX_PLAYERS = 10;
+
+        public static Action<List<string>> ActionOnPlayerJoined;
+        public static Action<int> ActionOnCreatedLobby;
+        public static Action ActionOnJoinedLobby;
+        public static Action ActionOnChangedMyPlayerData;
+        public static Action ActionOnChangedGameBulletModeData;
+        public static Action<string, string> ActionOnChangedPlayersStatData;
+
+
         private static Lobby m_CurrentLobby;
         public static Lobby CurrentLobby
         {
@@ -51,13 +62,16 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public static Action<List<string>> ActionOnPlayerJoined;
-        public static Action ActionOnJoinedLobby;
-        public static Action ActionOnChangedGameBulletModeData;
-        public static Action<Dictionary<string, string>> ActionOnChangedPlayersStatData;
-        public static Action ActionOnChangedMyPlayerData;
+        
 
         private LobbyEventCallbacks m_LobbyEventCallbacks;
+
+
+        public override void Init()
+        {
+            base.Init();
+            UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
+        }
 
 
         private async Task BindLobby(string lobbyID)
@@ -134,10 +148,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             try
             {
-                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", 100, UGSLobbyDataController.CreateLobbyOption(username));
+                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(username));
                 Debug.Log($"UGSLobbyManager-CreateLobbyAsync-LobbyId:{m_CurrentLobby.Id}, LobbyCode:{m_CurrentLobby.LobbyCode}");
+                UGSAuthManager.MyUsername = username;
                 await BindLobby(m_CurrentLobby.Id);
                 StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
+                ActionOnCreatedLobby?.Invoke(LOBBY_MAX_PLAYERS);
                 ActionOnJoinedLobby?.Invoke();
                 return true;
             }
@@ -191,6 +207,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 };
 
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, options);
+                UGSAuthManager.MyUsername = username;
                 await BindLobby(m_CurrentLobby.Id);
                 ActionOnJoinedLobby?.Invoke();
                 return true;
@@ -255,6 +272,16 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         #region Events
 
+        /// <summary>
+        //  When Host joined the "Relay Server" that "Relay Server"'s join code must be share to other joined players.
+        /// </summary>
+        /// <param name="relayJoinCode"></param>
+        private async void OnJoinedRelayServer(string relayJoinCode)
+        {
+            if(AmIhost)
+                await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(relayJoinCode));
+        }
+
         private void OnApplicationQuit()
         {
             if (m_CurrentLobby == null)
@@ -269,6 +296,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
             {
                 Debug.Log($"UGSLobbyManager-OnApplicationQuit-ex:{ex}");
             }
+        }
+
+        private void OnDestroy()
+        {
+            UGSRelayManager.ActionOnJoinedRelayServer -= OnJoinedRelayServer;
         }
 
         #region Lobby Events
@@ -301,24 +333,38 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> changedData)
         {
-            Dictionary<string, string> changedDatas = new(); 
-
+            string key;
+            string data;
             Debug.Log($"UGSLobbyManager-OnDataChanged-Count:" + changedData.Count);
+            if (m_CurrentLobby == null)
+                return;
+
             foreach (var item in changedData)
             {
-                changedDatas.Add(item.Key, item.Value.Value.Value);
-                Debug.Log($"UGSLobbyManager-OnDataChanged-Key:{item.Key}, lobbyValue=> {item.Value.Value.Value}");
-            }
+                key = item.Key;
+                data = item.Value.Value.Value;
+                Debug.Log($"UGSLobbyManager-OnDataChanged-Key:{key}, data=> {data}");
 
-            if (changedDatas.ContainsKey(UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR) || changedDatas.ContainsKey(UGSLobbyDataController.LOBBY_DATA_BULLET_SIZE))
-            {
-                changedDatas.Remove(UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR);
-                changedDatas.Remove(UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR);
-                ActionOnChangedGameBulletModeData?.Invoke();
-            }
-            else
-            {
-                ActionOnChangedPlayersStatData?.Invoke(changedDatas);
+                if (key == UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR || key == UGSLobbyDataController.LOBBY_DATA_BULLET_SIZE)
+                {
+                    ActionOnChangedGameBulletModeData?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataChanged-LOBBY_DATA_RELAY_JOIN_CODE");
+                }
+                else
+                {
+                    //for players score stats
+                    foreach (Player player in m_CurrentLobby.Players)
+                    {
+                        if (player.Id == key)
+                        {
+                            ActionOnChangedPlayersStatData?.Invoke(key, data);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
