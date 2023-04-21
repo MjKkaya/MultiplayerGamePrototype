@@ -11,7 +11,7 @@ namespace MultiplayerGamePrototype.Players
     public class NOPlayerStunBombController : NetworkBehaviour
     {
         //"Time required to wait before being able to fire the bomd
-        private static float BOMB_WAITING_TIMEOUT = 5f;
+        private static float BOMB_TIMEOUT = 5f;
 
         [SerializeField] Transform m_BombPrefab;
         [SerializeField] Transform m_BombDeployPosition;
@@ -29,7 +29,6 @@ namespace MultiplayerGamePrototype.Players
             base.OnNetworkSpawn();
             m_bombWaitingTimeoutDelta = 0.0f;
 
-            // get a reference to our main camera
             if (m_mainCamera == null)
                 m_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
@@ -40,7 +39,7 @@ namespace MultiplayerGamePrototype.Players
             Debug.Log($"{name}-DeployTheBomb");
             m_StarterAssetsInputs.bomb = false;
             isBombDeployed = true;
-            m_bombWaitingTimeoutDelta = BOMB_WAITING_TIMEOUT;
+            m_bombWaitingTimeoutDelta = BOMB_TIMEOUT;
             DeployTheBombServerRPC();
         }
 
@@ -49,7 +48,7 @@ namespace MultiplayerGamePrototype.Players
             Debug.Log($"{name}-FireTheBomb");
             m_StarterAssetsInputs.bomb = false;
             isBombDeployed = false;
-            m_bombWaitingTimeoutDelta = BOMB_WAITING_TIMEOUT;
+            m_bombWaitingTimeoutDelta = BOMB_TIMEOUT;
             FireTheBombServerRPC();
         }
 
@@ -103,7 +102,7 @@ namespace MultiplayerGamePrototype.Players
                 return;
 
             // One button control Deploy and Fire the bomb. Each waiting time is 5 second after any action.
-            if (m_StarterAssetsInputs.bomb == true){
+            if (m_StarterAssetsInputs.bomb){
                 if (m_bombWaitingTimeoutDelta <= 0)
                 {
                     if (!isBombDeployed)
@@ -120,9 +119,6 @@ namespace MultiplayerGamePrototype.Players
 
             if (m_bombWaitingTimeoutDelta > 0)
                 m_bombWaitingTimeoutDelta -= Time.deltaTime;
-
-            if(Input.GetKeyDown(KeyCode.C))
-                m_BombNetworkObject.GetComponent<NOStunBomb>().CalculateEffectedPlayers();
         }
     }
 }

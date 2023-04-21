@@ -54,7 +54,7 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         
         public void SetMyBulletMode()
         {
-            m_MyBulletModeText.text = UGSPlayerDataController.GetPlayerBulletMode(UGSAuthManager.MyPlayerId);
+            m_MyBulletModeText.text = UGSPlayerDataController.GetMyBulletMode();
         }
 
 

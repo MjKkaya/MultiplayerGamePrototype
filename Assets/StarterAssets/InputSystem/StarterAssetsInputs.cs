@@ -46,15 +46,13 @@ namespace StarterAssets
 			SprintInput(value.isPressed);
 		}
 
-        public void OnFire(InputValue value)
+        public void OnShot(InputValue value)
         {
-			Debug.Log($"OnFire:{value}");
             ShotInput(value.isPressed);
         }
 
         public void OnBomb(InputValue value)
         {
-            Debug.Log($"OnBomb:{value.isPressed}");
             BombInput(value.isPressed);
         }
 #endif
@@ -82,14 +80,12 @@ namespace StarterAssets
 
         public void ShotInput(bool newShotState)
         {
-            Debug.Log($"ShotInput:{newShotState}");
             shot = newShotState;
         }
 
-        public void BombInput(bool newShotState)
+        public void BombInput(bool newBombState)
         {
-            Debug.Log($"BombInput:{newShotState}");
-            bomb = newShotState;
+            bomb = newBombState;
         }
 
         private void OnApplicationFocus(bool hasFocus)

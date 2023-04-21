@@ -34,14 +34,16 @@ namespace MultiplayerGamePrototype.Players
             m_UICanvasControllerInput.gameObject.SetActive(true);
         }
 
-
         IEnumerator ImmobilizedCoroutine()
         {
+#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
             m_MobileDisableAutoSwitchControls.playerInput.enabled = false;
             yield return new WaitForSeconds(SOGameData.Singleton.PlyaerImmobilizedTime);
             m_MobileDisableAutoSwitchControls.playerInput.enabled = true;
+#else
+            yield return null;
+#endif
         }
-
 
         #region Events
 

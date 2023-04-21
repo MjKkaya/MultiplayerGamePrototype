@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Fire",
+                    "name": "Shot",
                     "type": "Button",
                     "id": "b229b53b-304a-457b-b097-67d7bf10e732",
                     "expectedControlType": "Button",
@@ -244,7 +244,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
-                    "action": "Fire",
+                    "action": "Shot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fa23505f-fb6f-4fa8-a410-6a047868a11d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Shot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

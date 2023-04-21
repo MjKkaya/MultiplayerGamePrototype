@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using MultiplayerGamePrototype.UGS.Managers;
 using Unity.Services.Lobbies;
@@ -40,8 +39,7 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         public static string GetPlayerUsername(Player player)
         {
             string username = string.Empty;
-            PlayerDataObject playerDataObject;
-            player.Data.TryGetValue(PLAYER_DATA_USERNAME, out playerDataObject);
+            player.Data.TryGetValue(PLAYER_DATA_USERNAME, out PlayerDataObject playerDataObject);
             if (playerDataObject != null)
                 username = playerDataObject.Value;
             return username;
@@ -91,20 +89,66 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         }
 
 
-        public static string GetPlayerBulletMode(string playerId)
+
+        public static BulletColorTypes GetPlayerBulletColorType(string playerId)
         {
             Lobby currentLobby = UGSLobbyManager.CurrentLobby;
-            string bulletMode = "-Null-"; ;
-            PlayerDataObject bulletColor;
-            PlayerDataObject bulletSize;
+            BulletColorTypes bulletColorType = BulletColorTypes.Red;
             if (currentLobby != null)
             {
                 foreach (Player player in currentLobby.Players)
                 {
                     if (player.Id == playerId)
                     {
-                        player.Data.TryGetValue(PLAYER_DATA_BULLET_COLOR, out bulletColor);
-                        player.Data.TryGetValue(PLAYER_DATA_BULLET_SIZE, out bulletSize);
+                        player.Data.TryGetValue(PLAYER_DATA_BULLET_COLOR, out PlayerDataObject bulletColor);
+                        if (bulletColor != null)
+                            System.Enum.TryParse(bulletColor.Value, out bulletColorType);
+
+                        break;
+                    }
+                }
+            }
+
+            return bulletColorType;
+        }
+
+        public static BulletSizeTypes GetPlayerBulletSizeType(string playerId)
+        {
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+            BulletSizeTypes bulletSizeType = BulletSizeTypes.Standard;
+            if (currentLobby != null)
+            {
+                foreach (Player player in currentLobby.Players)
+                {
+                    if (player.Id == playerId)
+                    {
+                        player.Data.TryGetValue(PLAYER_DATA_BULLET_SIZE, out PlayerDataObject bulletColor);
+                        if (bulletColor != null)
+                            System.Enum.TryParse(bulletColor.Value, out bulletSizeType);
+
+                        break;
+                    }
+                }
+            }
+
+            return bulletSizeType;
+        }
+
+
+        #region My Lobby Data
+
+        public static string GetMyBulletMode()
+        {
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+            string bulletMode = "-Null-"; ;
+            if (currentLobby != null)
+            {
+                foreach (Player player in currentLobby.Players)
+                {
+                    if (player.Id == UGSAuthManager.MyPlayerId)
+                    {
+                        player.Data.TryGetValue(PLAYER_DATA_BULLET_COLOR, out PlayerDataObject bulletColor);
+                        player.Data.TryGetValue(PLAYER_DATA_BULLET_SIZE, out PlayerDataObject bulletSize);
 
                         if (bulletColor != null && bulletSize != null)
                             bulletMode = bulletColor.Value + "-" + bulletSize.Value;
@@ -117,51 +161,17 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
             return bulletMode;
         }
 
-        public static BulletColorTypes GetMyPlayerBulletColorType()
+        public static BulletColorTypes GetMyBulletColorType()
         {
-            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
-            BulletColorTypes bulletColorType = BulletColorTypes.Red;
-            PlayerDataObject bulletColor;
-            if (currentLobby != null)
-            {
-                foreach (Player player in currentLobby.Players)
-                {
-                    if (player.Id == UGSAuthManager.MyPlayerId)
-                    {
-                        player.Data.TryGetValue(PLAYER_DATA_BULLET_COLOR, out bulletColor);
-                        if (bulletColor != null)
-                            System.Enum.TryParse(bulletColor.Value, out bulletColorType);
-
-                        break;
-                    }
-                }
-            }
-
-            return bulletColorType;
+            return GetPlayerBulletColorType(UGSAuthManager.MyPlayerId);
         }
 
-        public static BulletSizeTypes GetMyPlayerBulletSizeType()
+        public static BulletSizeTypes GetMyBulletSizeType()
         {
-            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
-            BulletSizeTypes bulletSizeType = BulletSizeTypes.Standard;
-            PlayerDataObject bulletColor;
-            if (currentLobby != null)
-            {
-                foreach (Player player in currentLobby.Players)
-                {
-                    if (player.Id == UGSAuthManager.MyPlayerId)
-                    {
-                        player.Data.TryGetValue(PLAYER_DATA_BULLET_SIZE, out bulletColor);
-                        if (bulletColor != null)
-                            System.Enum.TryParse(bulletColor.Value, out bulletSizeType);
-
-                        break;
-                    }
-                }
-            }
-
-            return bulletSizeType;
+            return GetPlayerBulletSizeType(UGSAuthManager.MyPlayerId);
         }
+
+        #endregion
 
         #endregion
     }

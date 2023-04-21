@@ -1,5 +1,4 @@
 using MultiplayerGamePrototype.UGS.Managers;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -55,6 +54,16 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         }
 
 
+        public static bool IsMyBulletTypeEqualsToLobbyBulletType()
+        {
+            return IsPlayerBulletTypeEqualsToLobbyBulletType(UGSAuthManager.MyPlayerId);
+        }
+
+        public static bool IsPlayerBulletTypeEqualsToLobbyBulletType(string playerId)
+        {
+            return UGSPlayerDataController.GetPlayerBulletColorType(playerId) == GetLobbyBulletColorType() && UGSPlayerDataController.GetPlayerBulletSizeType(playerId) == GetLobbyBulletSizeType();
+        }
+
         #region Relay Join Code
 
         public static UpdateLobbyOptions CreateRelayJoinCodeData(string relayJoinCode)
@@ -76,8 +85,7 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
             if (currentLobby != null)
             {
-                DataObject dataObject;
-                currentLobby.Data.TryGetValue(LOBBY_DATA_RELAY_JOIN_CODE, out dataObject);
+                currentLobby.Data.TryGetValue(LOBBY_DATA_RELAY_JOIN_CODE, out DataObject dataObject);
                 joinCode = dataObject.Value;
             }
 
@@ -98,24 +106,6 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
             return lobbyOptions;
         }
 
-        public static string GetLobbyBulletMode()
-        {
-            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
-            string bulletMode = "-Null-"; ;
-            DataObject bulletColor;
-            DataObject bulletSize;
-            if (currentLobby != null)
-            {
-                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_COLOR, out bulletColor);
-                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_SIZE, out bulletSize);
-
-                if (bulletColor != null && bulletSize != null)
-                    bulletMode = bulletColor.Value + "-" + bulletSize.Value;
-            }
-
-            return bulletMode;
-        }
-
         private static Dictionary<string, DataObject> CreateRandomLobbyBulletData()
         {
             string bulletColor = ((BulletColorTypes)(Random.Range(0, (int)BulletColorTypes.Max))).ToString();
@@ -129,6 +119,52 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
             };
 
             return bulletData;
+        }
+
+        public static string GetLobbyBulletMode()
+        {
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+            string bulletMode = "-Null-"; ;
+            if (currentLobby != null)
+            {
+                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_COLOR, out DataObject bulletColor);
+                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_SIZE, out DataObject bulletSize);
+
+                if (bulletColor != null && bulletSize != null)
+                    bulletMode = bulletColor.Value + "-" + bulletSize.Value;
+            }
+
+            return bulletMode;
+        }
+
+        private static BulletColorTypes GetLobbyBulletColorType()
+        {
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+            BulletColorTypes bulletColorTypes = BulletColorTypes.Red;
+
+            if (currentLobby != null)
+            {
+                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_COLOR, out DataObject bulletColor);
+                if (bulletColor != null)
+                    System.Enum.TryParse(bulletColor.Value, out bulletColorTypes);
+            }
+
+            return bulletColorTypes;
+        }
+
+        private static BulletSizeTypes GetLobbyBulletSizeType()
+        {
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+            BulletSizeTypes bulletSizeTypes = BulletSizeTypes.Standard;
+
+            if (currentLobby != null)
+            {
+                currentLobby.Data.TryGetValue(LOBBY_DATA_BULLET_SIZE, out DataObject bulletSize);
+                if (bulletSize != null)
+                    System.Enum.TryParse(bulletSize.Value, out bulletSizeTypes);
+            }
+
+            return bulletSizeTypes;
         }
 
         #endregion
@@ -170,8 +206,9 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         public static UpdateLobbyOptions IncreasePlayerScoreStat(string playerId, int additionScore)
         {
             int score = GetPlayerScoreStat(playerId);
-            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreStat-score:{score}, additionScore:{additionScore}");
+            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreStat-playerId:{playerId}, score:{score}, additionScore:{additionScore}");
             score += additionScore;
+            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreStat-score:{score}");
 
             UpdateLobbyOptions lobbyOptions = new()
             {

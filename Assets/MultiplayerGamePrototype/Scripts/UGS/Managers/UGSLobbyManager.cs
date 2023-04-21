@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 
 namespace MultiplayerGamePrototype.UGS.Managers

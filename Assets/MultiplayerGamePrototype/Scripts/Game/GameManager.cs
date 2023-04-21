@@ -10,6 +10,11 @@ namespace MultiplayerGamePrototype.Game
     {
         public static Action ActionOnImmobilizedPlayer;
 
+        public static Camera MainCamera{
+            get{
+                return Singleton.m_MainCamera;
+            }
+        }
 
         [SerializeField] private NOPlayerFPSController m_FPSController;
         public NOPlayerFPSController FPSController{
@@ -17,6 +22,9 @@ namespace MultiplayerGamePrototype.Game
                 return m_FPSController;
             }
         }
+
+        [SerializeField]
+        private Camera m_MainCamera;
 
 
         public override void Init()

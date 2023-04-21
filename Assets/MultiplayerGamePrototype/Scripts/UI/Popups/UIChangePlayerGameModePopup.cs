@@ -26,8 +26,8 @@ namespace MultiplayerGamePrototype.UI.Popups
 
         public override void Show()
         {
-            m_BulletColorDropdown.value = (int)UGSPlayerDataController.GetMyPlayerBulletColorType();
-            m_BulletSizeDropdown.value = (int)UGSPlayerDataController.GetMyPlayerBulletSizeType();
+            m_BulletColorDropdown.value = (int)UGSPlayerDataController.GetMyBulletColorType();
+            m_BulletSizeDropdown.value = (int)UGSPlayerDataController.GetMyBulletSizeType();
             base.Show();
         }
 

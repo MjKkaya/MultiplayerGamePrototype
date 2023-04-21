@@ -26,5 +26,13 @@ namespace MultiplayerGamePrototype.ScriptableObjects
                 return m_StunBombEffectAreaRadius;
             }
         }
+
+        [SerializeField]
+        private int m_HittingTargetScore;
+        public int HittingTargetScore{
+            get{
+                return m_HittingTargetScore;
+            }
+        }
     }
 } 
