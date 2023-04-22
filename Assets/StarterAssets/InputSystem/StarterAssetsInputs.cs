@@ -14,6 +14,7 @@ namespace StarterAssets
 		public bool sprint;
 		public bool shot;
 		public bool bomb;
+		//public bool mouseLock;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -55,6 +56,13 @@ namespace StarterAssets
         {
             BombInput(value.isPressed);
         }
+
+        public void OnMouseLock(InputValue value)
+        {
+            //MouseLockInput(value.isPressed);
+			cursorLocked = !cursorLocked;
+			cursorInputForLook = !cursorInputForLook;
+        }
 #endif
 
 
@@ -87,6 +95,11 @@ namespace StarterAssets
         {
             bomb = newBombState;
         }
+
+        //public void MouseLockInput(bool newMouseLockState)
+        //{
+        //    mouseLock = newMouseLockState;
+        //}
 
         private void OnApplicationFocus(bool hasFocus)
 		{

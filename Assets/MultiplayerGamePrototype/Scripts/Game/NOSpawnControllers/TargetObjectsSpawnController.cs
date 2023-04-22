@@ -3,9 +3,9 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.Game.Targets
+namespace MultiplayerGamePrototype.Game.NOSpawnControllers
 {
-    public class NOTargetObjectsSpawnController : MonoBehaviour
+    public class TargetObjectsSpawnController : MonoBehaviour
     {
         [SerializeField]
         private Transform m_TragetObjectPrefab;
@@ -53,7 +53,7 @@ namespace MultiplayerGamePrototype.Game.Targets
                         continue;
                     }
                 }
-                randomPos = new Vector3(randomPos.x, yPos * 4, randomPos.z);
+                randomPos = new Vector3(randomPos.x, yPos * 2, randomPos.z);
                 networkObject = Object.Instantiate(m_TragetObjectPrefab, randomPos, Quaternion.identity).GetComponent<NetworkObject>();
                 networkObject.Spawn();
                 m_SpawnedTargetObjects.Add(networkObject);

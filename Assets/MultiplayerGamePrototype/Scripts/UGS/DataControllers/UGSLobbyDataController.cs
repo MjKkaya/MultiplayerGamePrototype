@@ -61,7 +61,14 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
         public static bool IsPlayerBulletTypeEqualsToLobbyBulletType(string playerId)
         {
-            return UGSPlayerDataController.GetPlayerBulletColorType(playerId) == GetLobbyBulletColorType() && UGSPlayerDataController.GetPlayerBulletSizeType(playerId) == GetLobbyBulletSizeType();
+            BulletColorTypes playerBulletColor = UGSPlayerDataController.GetPlayerBulletColorType(playerId);
+            BulletColorTypes lobbyBulletColor = GetLobbyBulletColorType();
+
+            BulletSizeTypes playerBulletSize = UGSPlayerDataController.GetPlayerBulletSizeType(playerId);
+            BulletSizeTypes lobbyBulletSize = GetLobbyBulletSizeType();
+
+            Debug.Log($"UGSLobbyDataController-IsPlayerBulletTypeEqualsToLobbyBulletType-playerId:{playerId}=>BulletColor:{playerBulletColor}/{lobbyBulletColor}, BulletSize:{playerBulletSize}/{lobbyBulletSize}");
+            return playerBulletColor == lobbyBulletColor && playerBulletSize == lobbyBulletSize;
         }
 
         #region Relay Join Code

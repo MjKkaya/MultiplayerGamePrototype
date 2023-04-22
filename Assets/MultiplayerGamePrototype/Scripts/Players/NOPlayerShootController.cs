@@ -35,7 +35,7 @@ namespace MultiplayerGamePrototype.Players
         private void Shot()
         {
             Debug.Log($"{name}-Shot");
-            //todo: make sound
+            //todo: add sound
             m_shotTimeout = SHOT_TIMEOUT;
             m_StarterAssetsInputs.shot = false;
             ShootBulletServerRpc();
@@ -78,7 +78,7 @@ namespace MultiplayerGamePrototype.Players
 
         private void Update()
         {
-            Debug.DrawRay(m_CameraTransform.position, m_CameraTransform.TransformDirection(Vector3.forward) * GameManager.MainCamera.farClipPlane, Color.green);
+            //Debug.DrawRay(m_CameraTransform.position, m_CameraTransform.TransformDirection(Vector3.forward) * GameManager.MainCamera.farClipPlane, Color.green);
 
             if (!IsOwner)
                 return;

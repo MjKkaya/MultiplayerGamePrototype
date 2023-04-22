@@ -1,11 +1,13 @@
 using MultiplayerGamePrototype.Core;
-using MultiplayerGamePrototype.UGS.Managers;
-using MultiplayerGamePrototype.Game.Targets;
+using MultiplayerGamePrototype.Game.NOSpawnControllers;
 using MultiplayerGamePrototype.Players;
 using MultiplayerGamePrototype.ScriptableObjects;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.UIElements;
+
 
 namespace MultiplayerGamePrototype.Game
 {
@@ -28,16 +30,17 @@ namespace MultiplayerGamePrototype.Game
             }
         }
 
-        public NOTargetObjectsSpawnController NOTargetObjectsSpawnController;
+        public PlayerSpawnController PlayerSpawnController;
+        public TargetObjectsSpawnController TargetObjectsSpawnController;
 
 
         public override void Init()
         {
             base.Init();
-            UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
         }
 
-        public void HostSpawned()
+        public void HostPlayerSpawned()
         {
             CheckAndSpawnTargetObjects();
         }
@@ -49,35 +52,76 @@ namespace MultiplayerGamePrototype.Game
        
         public void CheckAndSpawnTargetObjects()
         {
-            if(NOTargetObjectsSpawnController.IsSpawnedObjectListEmpty)
+            if(TargetObjectsSpawnController.IsSpawnedObjectListEmpty)
             {
                 int randomCount = UnityEngine.Random.Range(SOGameData.Singleton.MinimumNumberSpawnTargetObject, SOGameData.Singleton.MinimumNumberSpawnTargetObject * 2);
-                NOTargetObjectsSpawnController.SpawnTargetObjects(SOGameData.Singleton.MinimumNumberSpawnTargetObject);
+                TargetObjectsSpawnController.SpawnTargetObjects(randomCount);
             }
         }
 
 
-        public void SpawnPlayerObjectThanChangeOwnerShip(ulong joinedClientId)
-        {
-            Debug.Log($"GameManager-SpawnPlayerObjectThanChangeOwnerShip-joinedClientId:{joinedClientId}");
-        }
-
         #region Available Positions
 
+        public List<Vector3> GetAvailablePosition(Vector3 objectSize, Vector3 areaSize, int count)
+        {
+            List<Vector3> positionList = new();
+
+            float yPos = objectSize.y;
+            float xDimension = (areaSize.x - objectSize.x) * 0.5f;
+            float zDimension = (areaSize.z - objectSize.z) * 0.5f;
+
+            float maxExtraIteration = count * 10;
+            Vector3 randomPos;
+
+            for (int i = 0; i < count; i++)
+            {
+                randomPos = transform.position + new Vector3(UnityEngine.Random.Range(-xDimension, xDimension), yPos, UnityEngine.Random.Range(-zDimension, zDimension));
+                Debug.Log($"GameManager-GetAvailablePosition-randomPos:{randomPos}");
+                if (IsBoxCollision(randomPos, objectSize))
+                {
+                    maxExtraIteration--;
+                    if (maxExtraIteration == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        i--;
+                        continue;
+                    }
+                }
+
+                randomPos = new Vector3(randomPos.x, yPos, randomPos.z);
+                positionList.Add(randomPos);
+            }
+
+            Debug.Log($"GameManager-GetAvailablePosition-positionList:{positionList.Count}");
+            return positionList;
+        }
+
+        private bool IsBoxCollision(Vector3 centerPoint, Vector3 objectSize)
+        {
+            int hitCount = Physics.OverlapBoxNonAlloc(centerPoint, objectSize * 0.5f, new Collider[1]);
+            Debug.Log($"GameManager-IsBoxCollision-hitCount:{hitCount}");
+            return hitCount > 0;
+        }
 
         #endregion
 
 
         #region Events
 
-        private void OnJoinedRelayServer()
+
+        private void OnClientConnectedCallback(ulong connectedClientId)
         {
-            SpawnPlayerObjectThanChangeOwnerShip(NetworkManager.Singleton.LocalClientId);
+            if(NetworkManager.Singleton.IsServer)
+                PlayerSpawnController.SpawnPlayerObject(connectedClientId);
         }
 
         private void OnDestroy()
         {
-            UGSRelayManager.ActionOnJoinedRelayServer -= OnJoinedRelayServer;
+            if(NetworkManager.Singleton != null)
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
         }
 
         #endregion

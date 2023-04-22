@@ -40,9 +40,11 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
 
         private void AddNewItemForNewPlayer(List<string> newPlayerIds)
         {
+            Debug.Log("UIGamePlayersScorePanel-AddNewItemForNewPlayer");
             int playerScore;
             foreach (string newPlayerId in newPlayerIds)
             {
+                Debug.Log($"UIGamePlayersScorePanel-AddNewItemForNewPlayer-newPlayerId:{newPlayerId}");
                 if (!m_ScoreItems.ContainsKey(newPlayerId))
                 {
                     playerScore = UGSLobbyDataController.GetPlayerScoreStat(newPlayerId);

@@ -236,6 +236,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5420857361349278248, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
+      propertyPath: cursorLocked
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616685848737228371, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8616685848737228372, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
       propertyPath: m_Name
       value: NOPlayer
@@ -254,7 +262,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8997996947095583982, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: 8997996947095583982, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
       propertyPath: m_LocalPosition.z
@@ -322,6 +330,18 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &49529740139526755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1698182352821242280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d08209c59055c49c5873ccecbb86d00f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &928689482213832035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,6 +383,7 @@ MonoBehaviour:
   m_TransformPlayerCameraRoot: {fileID: 6442184793140146420}
   m_StarterAssetsInputs: {fileID: 3116342469246686676}
   m_PlayerInput: {fileID: 1698182352821242276}
+  m_FirstPersonController: {fileID: 1698182352821242287}
 --- !u!114 &2451800367822693201
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,6 +416,17 @@ MonoBehaviour:
   m_BombPrefab: {fileID: 3114454183818361463, guid: 865aaa199b4b84b71acb7cec6461415e, type: 3}
   m_BombDeployPosition: {fileID: 6703024603234526745}
   m_StarterAssetsInputs: {fileID: 3116342469246686676}
+--- !u!114 &1698182352821242287 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8616685848737228371, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
+  m_PrefabInstance: {fileID: 6919140887740116988}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1698182352821242280}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55919ac34a26952479f3fc91f777b2fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &2079246266932335378 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8997996947095583982, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}

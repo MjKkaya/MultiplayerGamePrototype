@@ -20,7 +20,7 @@ namespace MultiplayerGamePrototype.Game.Targets
             //todo: add particle effect
             if(IsServer)
             {
-                GameManager.Singleton.NOTargetObjectsSpawnController.DespawnTargetObject(NetworkObject);
+                GameManager.Singleton.TargetObjectsSpawnController.DespawnTargetObject(NetworkObject);
             }
         }
 

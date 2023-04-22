@@ -23,12 +23,16 @@ namespace MultiplayerGamePrototype.Players
         [SerializeField] private Transform m_TransformPlayerCameraRoot;
         [SerializeField] private StarterAssetsInputs m_StarterAssetsInputs;
         [SerializeField] private PlayerInput m_PlayerInput;
+        [SerializeField] private FirstPersonController m_FirstPersonController;
 
 
         public override void OnNetworkSpawn()
         {
+            Debug.Log($"{name}-OnNetworkSpawn-IsServer:{IsServer}, pos:{transform.position}");
+            if (IsServer && !IsOwner)
+                transform.position = GameManager.Singleton.PlayerSpawnController.GetAvaiablePosition();
             base.OnNetworkSpawn();
-            Debug.Log($"{name}-OnNetworkSpawn");
+            Debug.Log($"{name}-OnNetworkSpawn-OwnerClientId:{OwnerClientId}, pos:{transform.position}");
             m_PlayerId.OnValueChanged += PlayerIdOnValueChanged;
             if (IsOwner)
                 InitFPSControls();
@@ -40,10 +44,11 @@ namespace MultiplayerGamePrototype.Players
             m_PlayerId.Value = UGSAuthManager.MyPlayerId;
             name = $"Player-{username}";
             Debug.Log($"{name}-InitFPSControls");
+            m_FirstPersonController.enabled = true;
             m_PlayerInput.enabled = true;
             GameManager.Singleton.FPSController.SetFPSPlayer(m_TransformPlayerCameraRoot, m_PlayerInput, m_StarterAssetsInputs);
             if (IsServer)
-                GameManager.Singleton.HostSpawned();
+                GameManager.Singleton.HostPlayerSpawned();
         }
 
         private void PlayerIdOnValueChanged(FixedString64Bytes oldValue, FixedString64Bytes newValue)

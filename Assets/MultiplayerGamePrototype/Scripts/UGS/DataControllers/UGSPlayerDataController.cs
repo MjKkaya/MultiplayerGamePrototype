@@ -54,7 +54,11 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         {
             UpdatePlayerOptions playerOptions = new()
             {
-                Data = CreateRandomPlayerBulletData()
+                Data = new()
+                {
+                    { PLAYER_DATA_BULLET_COLOR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, bulletColor)},
+                    { PLAYER_DATA_BULLET_SIZE, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, bulletSize)}
+                }
             };
 
             return playerOptions;
@@ -66,8 +70,8 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
             Dictionary<string, PlayerDataObject> playerDatas = new()
             {
-                { PLAYER_DATA_BULLET_COLOR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Private, BulletColorTypes.Red.ToString())},
-                { PLAYER_DATA_BULLET_SIZE, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Private, BulletSizeTypes.Standard.ToString())}
+                { PLAYER_DATA_BULLET_COLOR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, BulletColorTypes.Red.ToString())},
+                { PLAYER_DATA_BULLET_SIZE, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, BulletSizeTypes.Standard.ToString())}
             };
 
             return playerDatas;
@@ -81,14 +85,12 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
 
             Dictionary<string, PlayerDataObject> playerDatas = new()
             {
-                { PLAYER_DATA_BULLET_COLOR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Private, bulletColor)},
-                { PLAYER_DATA_BULLET_SIZE, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Private, bulletSize)}
+                { PLAYER_DATA_BULLET_COLOR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, bulletColor)},
+                { PLAYER_DATA_BULLET_SIZE, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, bulletSize)}
             };
 
             return playerDatas;
         }
-
-
 
         public static BulletColorTypes GetPlayerBulletColorType(string playerId)
         {
