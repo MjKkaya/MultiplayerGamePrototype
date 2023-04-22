@@ -275,10 +275,10 @@ namespace MultiplayerGamePrototype.UGS.Managers
         //  When Host joined the "Relay Server" that "Relay Server"'s join code must be share to other joined players.
         /// </summary>
         /// <param name="relayJoinCode"></param>
-        private async void OnJoinedRelayServer(string relayJoinCode)
+        private async void OnJoinedRelayServer()
         {
             if(AmIhost)
-                await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(relayJoinCode));
+                await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(UGSRelayManager.Singleton.JoinCode));
         }
 
         private void OnApplicationQuit()

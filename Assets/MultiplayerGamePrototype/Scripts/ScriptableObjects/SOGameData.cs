@@ -1,4 +1,5 @@
 using MultiplayerGamePrototype.Core;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -32,6 +33,14 @@ namespace MultiplayerGamePrototype.ScriptableObjects
         public int HittingTargetScore{
             get{
                 return m_HittingTargetScore;
+            }
+        }
+
+        [SerializeField]
+        private int m_MinimumNumberSpawnTargetObject;
+        public int MinimumNumberSpawnTargetObject{
+            get{
+                return m_MinimumNumberSpawnTargetObject;
             }
         }
     }

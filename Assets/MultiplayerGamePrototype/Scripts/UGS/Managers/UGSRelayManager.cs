@@ -13,7 +13,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSRelayManager : ManagerSingleton<UGSRelayManager>
     {
-        public static Action<string> ActionOnJoinedRelayServer;
+        public static Action ActionOnJoinedRelayServer;
         public static Action ActionOnFailedToJoinRelayServer;
 
 
@@ -62,7 +62,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                     NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(m_RelayServerData);
                     NetworkManager.Singleton.StartHost();
                     NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-                    ActionOnJoinedRelayServer?.Invoke(m_JoinCode);
+                    ActionOnJoinedRelayServer?.Invoke();
                 }
                 catch (Exception ex)
                 {
@@ -88,7 +88,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 NetworkManager.Singleton.StartClient();
                 m_JoinCode = joinCode;
                 NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-                ActionOnJoinedRelayServer?.Invoke(m_JoinCode);
+                ActionOnJoinedRelayServer?.Invoke();
             }
             catch (Exception ex)
             {
@@ -113,7 +113,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private void OnClientDisconnectCallback(ulong connectedClientId)
         {
             Debug.Log($"UGSRelayManager-OnClientDisconnectCallback-NetworkManager.Singleton.LocalClientId:{NetworkManager.Singleton.LocalClientId}, connectedClientId:{connectedClientId}, DisconnectReason:{NetworkManager.Singleton.DisconnectReason}");
-            //todo:We can change the host of the lobby and create new relay connection.
+            //todo:Change the host of the lobby and create new relay connection.
         }
 
         private void OnDestroy()

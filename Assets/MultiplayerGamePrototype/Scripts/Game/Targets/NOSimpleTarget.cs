@@ -20,9 +20,18 @@ namespace MultiplayerGamePrototype.Game.Targets
             //todo: add particle effect
             if(IsServer)
             {
-                //todo:destroy
-                NetworkObject.Despawn();
+                GameManager.Singleton.NOTargetObjectsSpawnController.DespawnTargetObject(NetworkObject);
             }
         }
+
+        //public override void OnNetworkDespawn()
+        //{
+        //    base.OnNetworkDespawn();
+        //    if(IsServer)
+        //    {
+        //        Debug.Log($"{name}-OnNetworkDespawn");
+        //        GameManager.Singleton.NOTargetObjectsSpawnController.();
+        //    }
+        //}
     }
 }

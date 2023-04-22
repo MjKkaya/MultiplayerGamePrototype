@@ -14,7 +14,6 @@ namespace MultiplayerGamePrototype.Players
     {
         //"Time required to pass before being able to shot again. Set to 0f to instantly shot again"
         private static readonly float SHOT_TIMEOUT = 0.25f;
-        private static readonly float SCREEN_SIZE_TIMEOUT = 5f;
 
 
         [SerializeField] Transform m_CameraTransform;
@@ -22,8 +21,6 @@ namespace MultiplayerGamePrototype.Players
         [SerializeField] private LayerMask m_TargetMask;
 
         private float m_shotTimeout;
-        private float m_screenSizeTimeout;
-        private Vector2 screenCenterPoint;
         private NOPlayer m_NOPlayer;
 
 
@@ -32,7 +29,6 @@ namespace MultiplayerGamePrototype.Players
             base.OnNetworkSpawn();
             m_NOPlayer = GetComponent<NOPlayer>();
             m_shotTimeout = SHOT_TIMEOUT;
-            SetScreenCenterPoint();
         }
 
 
@@ -45,17 +41,11 @@ namespace MultiplayerGamePrototype.Players
             ShootBulletServerRpc();
         }
 
-        private void SetScreenCenterPoint()
-        {
-            screenCenterPoint = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-            m_screenSizeTimeout = SCREEN_SIZE_TIMEOUT;
-            //Debug.Log($"{name}-SetScreenCenterPoint:{screenCenterPoint}");
-        }
 
         /// <summary>
-        /// Just Host can run this method!
+        /// Host adds/decreases score for hitted target.
         /// </summary>
-        private async void GivePointForHitTheTarget()
+        private async void GivePointForHitTarget()
         {
             string playerId = m_NOPlayer.PlayerId;
             bool isCorrectBullet = UGSLobbyDataController.IsPlayerBulletTypeEqualsToLobbyBulletType(playerId);
@@ -75,8 +65,8 @@ namespace MultiplayerGamePrototype.Players
                 Debug.Log($"{name}-raycastHit:{raycastHit.transform.name}");
                 if(raycastHit.transform.TryGetComponent(out NOSimpleTarget target))
                 {
-                    GivePointForHitTheTarget();
                     target.Hit();
+                    GivePointForHitTarget();
                 }
             }
         }
@@ -103,11 +93,6 @@ namespace MultiplayerGamePrototype.Players
                 else
                     m_StarterAssetsInputs.shot = false;
             }
-
-            if (m_screenSizeTimeout > 0.0f)
-                m_screenSizeTimeout -= Time.deltaTime;
-            else
-                SetScreenCenterPoint();
         }
         #endregion
     }
