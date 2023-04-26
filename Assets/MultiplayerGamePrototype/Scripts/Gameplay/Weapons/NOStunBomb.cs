@@ -5,7 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.Game.Weapons
+namespace MultiplayerGamePrototype.Gameplay.Weapons
 {
     public class NOStunBomb : NetworkBehaviour
     {

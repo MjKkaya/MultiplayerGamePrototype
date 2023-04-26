@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.Game.Targets
+namespace MultiplayerGamePrototype.Gameplay.Targets
 {
     public class NOSimpleTarget : NetworkBehaviour
     {
@@ -20,7 +20,7 @@ namespace MultiplayerGamePrototype.Game.Targets
             //todo: add particle effect
             if(IsServer)
             {
-                GameManager.Singleton.TargetObjectsSpawnController.DespawnTargetObject(NetworkObject);
+                GameplayManager.Singleton.TargetObjectsSpawnController.DespawnTargetObject(NetworkObject);
             }
         }
 

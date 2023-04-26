@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.Game.NOSpawnControllers
+namespace MultiplayerGamePrototype.Gameplay.NOSpawnControllers
 {
     public class TargetObjectsSpawnController : MonoBehaviour
     {
@@ -65,7 +65,7 @@ namespace MultiplayerGamePrototype.Game.NOSpawnControllers
         {
             m_SpawnedTargetObjects.Remove(spawnedObject);
             spawnedObject.Despawn();
-            GameManager.Singleton.CheckAndSpawnTargetObjects();
+            GameplayManager.Singleton.CheckAndSpawnTargetObjects();
         }
 
 

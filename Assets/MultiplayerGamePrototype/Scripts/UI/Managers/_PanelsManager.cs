@@ -7,10 +7,9 @@ namespace MultiplayerGamePrototype.UI.Managers
 {
     public enum PanelTypes
     {
-        Initialize = 0,
-        MainMenu = 1,
-        GameMode = 2,
-        GamePlayerScore = 3
+        MainMenu = 0,
+        GameMode = 1,
+        GamePlayerScore = 2
     }
 
 
@@ -33,14 +32,6 @@ namespace MultiplayerGamePrototype.UI.Managers
             }
         }
 
-
-        /// <summary>
-        /// First beginning panel will show when app launched.
-        /// </summary>
-        private void Start()
-        {
-            m_Panels[(int)PanelTypes.Initialize].Show();
-        }
 
         public void ShowPanel(PanelTypes panelTypes)
         {

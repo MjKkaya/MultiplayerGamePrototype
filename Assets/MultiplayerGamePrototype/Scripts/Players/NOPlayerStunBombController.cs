@@ -1,5 +1,5 @@
-using MultiplayerGamePrototype.Game;
-using MultiplayerGamePrototype.Game.Weapons;
+using MultiplayerGamePrototype.Gameplay;
+using MultiplayerGamePrototype.Gameplay.Weapons;
 using StarterAssets;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
@@ -92,7 +92,7 @@ namespace MultiplayerGamePrototype.Players
         public void ImmobilizPlayerClientRPC(ClientRpcParams clientRpcParams = default)
         {
             Debug.Log($"{name}-ImmobilizPlayerClientRPC");
-            GameManager.Singleton.PlayerImmobilized();
+            GameplayManager.Singleton.PlayerImmobilized();
         }
 
 

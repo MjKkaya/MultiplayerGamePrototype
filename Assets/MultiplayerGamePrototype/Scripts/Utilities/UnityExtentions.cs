@@ -1,18 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class UnityExtentions : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+namespace MultiplayerGamePrototype.Utilities
+{
+    public static class UnityExtentions
     {
-        
+        #region Canvas Group
+
+        public static void SetActive(this CanvasGroup canvasGroup, bool isActive)
+        {
+            canvasGroup.alpha = isActive ? 1 : 0;
+            canvasGroup.blocksRaycasts = isActive;
+            canvasGroup.interactable = isActive;
+        }
+
+        #endregion
     }
 }

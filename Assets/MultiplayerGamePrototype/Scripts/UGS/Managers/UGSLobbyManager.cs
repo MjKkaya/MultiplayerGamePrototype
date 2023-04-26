@@ -1,5 +1,6 @@
 using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.UGS.DataControllers;
+using MultiplayerGamePrototype.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace MultiplayerGamePrototype.UGS.Managers
 {
-    public class UGSLobbyManager : ManagerSingleton<UGSLobbyManager>
+    public class UGSLobbyManager : SingletonMonoPersistent<UGSLobbyManager>
     {
         private static readonly int LOBBY_MAX_PLAYERS = 10;
 
@@ -66,9 +67,9 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private LobbyEventCallbacks m_LobbyEventCallbacks;
 
 
-        public override void Init()
+        public override void Awake()
         {
-            base.Init();
+            base.Awake();
             UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
         }
 
@@ -143,13 +144,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
         //    //return lobblist;
         //}
 
-        public async Task<bool> CreateLobbyAsync(string username)
+        public async Task<bool> CreateLobbyAsync()
         {
             try
             {
-                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(username));
+                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(UGSAuthManager.MyUsername));
                 Debug.Log($"UGSLobbyManager-CreateLobbyAsync-LobbyId:{m_CurrentLobby.Id}, LobbyCode:{m_CurrentLobby.LobbyCode}");
-                UGSAuthManager.MyUsername = username;
                 await BindLobby(m_CurrentLobby.Id);
                 StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
                 ActionOnCreatedLobby?.Invoke(LOBBY_MAX_PLAYERS);
@@ -162,6 +162,33 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 return false;
             }
         }
+
+
+        public async Task<bool> QuickJoinLobbyAsync()
+        {
+            try
+            {
+                QuickJoinLobbyOptions quickJoinLobbyOptions = new()
+                {
+                    Filter = new List<QueryFilter>
+                    {
+                        new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT)
+                    },
+                    Player = UGSPlayerDataController.CreateLobbyPlayer(UGSAuthManager.MyUsername)
+                };
+
+                m_CurrentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(quickJoinLobbyOptions);
+                await BindLobby(m_CurrentLobby.Id);
+                ActionOnJoinedLobby?.Invoke();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"UGSLobbyManager-QuickJoinOrCreate-ex:{ex}");
+                return false;
+            }
+        }
+
 
         /*public async Task<bool> QuickJoinLobbyAsync(string username)
         {
@@ -196,17 +223,16 @@ namespace MultiplayerGamePrototype.UGS.Managers
             //}
         }*/
 
-        public async Task<bool> JoinLobbyByCodeAsync(string lobbyCode, string username)
+        public async Task<bool> JoinLobbyByCodeAsync(string lobbyCode)
         {
             try
             {
                 JoinLobbyByCodeOptions options = new()
                 {
-                    Player = UGSPlayerDataController.CreateLobbyPlayer(username)
+                    Player = UGSPlayerDataController.CreateLobbyPlayer(UGSAuthManager.MyUsername)
                 };
 
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, options);
-                UGSAuthManager.MyUsername = username;
                 await BindLobby(m_CurrentLobby.Id);
                 ActionOnJoinedLobby?.Invoke();
                 return true;

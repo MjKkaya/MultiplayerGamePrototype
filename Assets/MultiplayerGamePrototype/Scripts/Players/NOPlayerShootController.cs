@@ -1,5 +1,5 @@
-using MultiplayerGamePrototype.Game;
-using MultiplayerGamePrototype.Game.Targets;
+using MultiplayerGamePrototype.Gameplay;
+using MultiplayerGamePrototype.Gameplay.Targets;
 using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.ScriptableObjects;
 using StarterAssets;
@@ -60,7 +60,7 @@ namespace MultiplayerGamePrototype.Players
         private void ShootBulletServerRpc()
         {
             Ray ray = new(m_CameraTransform.position, m_CameraTransform.TransformDirection(Vector3.forward));
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, GameManager.MainCamera.farClipPlane * 0.5f, m_TargetMask))
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, GameplayManager.MainCamera.farClipPlane * 0.5f, m_TargetMask))
             {
                 Debug.Log($"{name}-raycastHit:{raycastHit.transform.name}");
                 if(raycastHit.transform.TryGetComponent(out NOSimpleTarget target))

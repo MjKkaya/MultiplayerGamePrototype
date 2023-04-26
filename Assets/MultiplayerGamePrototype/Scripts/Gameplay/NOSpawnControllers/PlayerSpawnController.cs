@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.Game.NOSpawnControllers
+namespace MultiplayerGamePrototype.Gameplay.NOSpawnControllers
 {
     public class PlayerSpawnController : MonoBehaviour
     {
@@ -39,7 +39,7 @@ namespace MultiplayerGamePrototype.Game.NOSpawnControllers
 
         public Vector3 GetAvaiablePosition()
         {
-            List<Vector3> positions = GameManager.Singleton.GetAvailablePosition(m_PlayerPrefab.localScale, areaSize, 1);
+            List<Vector3> positions = GameplayManager.Singleton.GetAvailablePosition(m_PlayerPrefab.localScale, areaSize, 1);
             Vector3 position = positions.Count == 0 ? DEFAULT_POSITION : positions[0];
             position = new Vector3(position.x, position.y * 2, position.z);
             Debug.Log($"PlayerSpawnController-GetAvaiablePosition-position:{position}");

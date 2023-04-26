@@ -1,4 +1,4 @@
-using MultiplayerGamePrototype.Game;
+using MultiplayerGamePrototype.Gameplay;
 using MultiplayerGamePrototype.ScriptableObjects;
 using System.Collections;
 using TMPro;
@@ -18,7 +18,7 @@ namespace MultiplayerGamePrototype.UI.Popups
         public override void Init()
         {
             m_WaitForSeconds = new WaitForSeconds(1.0f);
-            GameManager.ActionOnImmobilizedPlayer += OnImmobilizedPlayer;
+            GameplayManager.ActionOnImmobilizedPlayer += OnImmobilizedPlayer;
             m_CountdownText.text = string.Empty;
         }
 
@@ -53,7 +53,7 @@ namespace MultiplayerGamePrototype.UI.Popups
 
         private void OnDestroy()
         {
-            GameManager.ActionOnImmobilizedPlayer -= OnImmobilizedPlayer;
+            GameplayManager.ActionOnImmobilizedPlayer -= OnImmobilizedPlayer;
         }
 
         #endregion

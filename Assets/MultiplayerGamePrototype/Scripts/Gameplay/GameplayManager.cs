@@ -1,5 +1,5 @@
 using MultiplayerGamePrototype.Core;
-using MultiplayerGamePrototype.Game.NOSpawnControllers;
+using MultiplayerGamePrototype.Gameplay.NOSpawnControllers;
 using MultiplayerGamePrototype.Players;
 using MultiplayerGamePrototype.ScriptableObjects;
 using System;
@@ -9,9 +9,9 @@ using Unity.Netcode;
 using UnityEngine.UIElements;
 
 
-namespace MultiplayerGamePrototype.Game
+namespace MultiplayerGamePrototype.Gameplay
 {
-    public class GameManager : ManagerSingleton<GameManager>
+    public class GameplayManager : ManagerSingleton<GameplayManager>
     {
         public static Action ActionOnImmobilizedPlayer;
 
@@ -30,14 +30,27 @@ namespace MultiplayerGamePrototype.Game
             }
         }
 
+        [SerializeField] private SOGameData m_SOGameData;
+
         public PlayerSpawnController PlayerSpawnController;
         public TargetObjectsSpawnController TargetObjectsSpawnController;
 
 
+        private void Awake()
+        {
+            m_SOGameData.Init();
+            Init();
+        }
+
         public override void Init()
         {
             base.Init();
+
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
+
+            //Host must to create own player object manually.
+            if (NetworkManager.Singleton.IsServer)
+                OnClientConnectedCallback(0);
         }
 
         public void HostPlayerSpawned()

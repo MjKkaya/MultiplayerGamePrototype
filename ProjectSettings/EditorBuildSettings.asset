@@ -6,7 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/MultiplayerGamePrototype/Scenes/Bootstrap.unity
+    guid: caadf12fdd73b4dc7b8224b3dc9925c1
+  - enabled: 1
     path: Assets/MultiplayerGamePrototype/Scenes/Main.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/MultiplayerGamePrototype/Scenes/Lobby.unity
+    guid: c6c9d6c27c1bc45a2ad0c9bb261c1092
+  - enabled: 1
+    path: Assets/MultiplayerGamePrototype/Scenes/Gameplay.unity
+    guid: d4b842937e6bc481999b3f6cd61ac952
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}

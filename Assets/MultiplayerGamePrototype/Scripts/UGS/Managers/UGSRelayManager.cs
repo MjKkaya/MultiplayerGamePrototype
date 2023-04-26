@@ -1,5 +1,6 @@
 using System;
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.Utilities;
 using MultiplayerGamePrototype.UGS.DataControllers;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace MultiplayerGamePrototype.UGS.Managers
 {
-    public class UGSRelayManager : ManagerSingleton<UGSRelayManager>
+    public class UGSRelayManager : SingletonMonoPersistent<UGSRelayManager>
     {
         public static Action ActionOnJoinedRelayServer;
         public static Action ActionOnFailedToJoinRelayServer;
@@ -36,9 +37,9 @@ namespace MultiplayerGamePrototype.UGS.Managers
         }
 
 
-        public override void Init()
+        public override void Awake()
         {
-            base.Init();
+            base.Awake();
             UGSLobbyManager.ActionOnCreatedLobby += OnCreatedLobby;
             UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
         }
