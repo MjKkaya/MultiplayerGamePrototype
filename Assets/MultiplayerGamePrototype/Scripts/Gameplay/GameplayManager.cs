@@ -2,6 +2,7 @@ using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.Gameplay.NOSpawnControllers;
 using MultiplayerGamePrototype.Players;
 using MultiplayerGamePrototype.ScriptableObjects;
+using MultiplayerGamePrototype.UI.Panels.Gameplay;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,6 +32,7 @@ namespace MultiplayerGamePrototype.Gameplay
         }
 
         [SerializeField] private SOGameData m_SOGameData;
+        [SerializeField] private UIGameplayPanelsController m_UIGameplayPanelsController;
 
         public PlayerSpawnController PlayerSpawnController;
         public TargetObjectsSpawnController TargetObjectsSpawnController;
@@ -39,6 +41,7 @@ namespace MultiplayerGamePrototype.Gameplay
         private void Awake()
         {
             m_SOGameData.Init();
+            m_UIGameplayPanelsController.Init();
             Init();
         }
 

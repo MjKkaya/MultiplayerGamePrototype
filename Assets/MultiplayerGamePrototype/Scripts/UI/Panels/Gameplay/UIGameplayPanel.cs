@@ -1,6 +1,7 @@
-using MultiplayerGamePrototype.UI.Managers;
 using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UGS.DataControllers;
+using MultiplayerGamePrototype.UI.Core;
+using MultiplayerGamePrototype.UI.Panels.Gameplay.Popups;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,9 +9,9 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
 
-namespace MultiplayerGamePrototype.UI.Panels.GamePanels
+namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 {
-    public class UIGamePanel : UIBasePanel
+    public class UIGameplayPanel : UIBasePanel
     {
         [Header("Game Bullet Mode")]
         [SerializeField] private TextMeshProUGUI m_GameBulletModeText;
@@ -24,10 +25,10 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         [SerializeField] private TextMeshProUGUI m_LobbyInfoText;
         [SerializeField] private Button m_StatsPanelControlButton;
 
-        private bool m_IsPlayerSocrePanelOpen;
 
         public override void Init()
         {
+            base.Init();
             UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
             UGSLobbyManager.ActionOnChangedGameBulletModeData += OnChangedGameBulletModeData;
             UGSLobbyManager.ActionOnChangedMyPlayerData += OnChangedMyPlayerData;
@@ -42,7 +43,6 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
             SetMyBulletMode();
             m_ChangeGameBulletModeButton.gameObject.SetActive(UGSLobbyManager.AmIhost);
             m_LobbyInfoText.text = $"Id: {UGSLobbyManager.CurrentLobby.Id} \n Code:{UGSLobbyManager.CurrentLobby.LobbyCode}";
-            m_IsPlayerSocrePanelOpen = false;
             base.Show();
         }
 
@@ -104,16 +104,12 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
 
         private void OnButtonClickedChangeMyBulletMode()
         {
-            PopupsManager.Singleton.ShowPopup(PopupTypes.PlayerGameModeChange);
+            UIGameplayPanelsController.Singleton.ShowPopup(GameplayPopups.ChangePlayerGameMode);
         }
 
         private void OnButtonClickedStatsPanelControl()
         {
-            if(!m_IsPlayerSocrePanelOpen)
-                PanelsManager.Singleton.ShowPanel(PanelTypes.GamePlayerScore);
-            else
-                PanelsManager.Singleton.HidePanel(PanelTypes.GamePlayerScore);
-            m_IsPlayerSocrePanelOpen = !m_IsPlayerSocrePanelOpen;
+            UIGameplayPanelsController.Singleton.SwitchPanel(GameplayPanels.PlayerScore);
         }
 
         #endregion

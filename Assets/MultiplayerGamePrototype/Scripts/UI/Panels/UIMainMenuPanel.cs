@@ -1,6 +1,7 @@
 using DG.Tweening;
 using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.UI.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

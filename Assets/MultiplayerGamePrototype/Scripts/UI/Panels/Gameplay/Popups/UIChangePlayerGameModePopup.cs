@@ -1,5 +1,6 @@
 using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.UI.Core;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -7,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-namespace MultiplayerGamePrototype.UI.Popups
+namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 {
     public class UIChangePlayerGameModePopup : UIBasePopup
     {
@@ -17,8 +18,14 @@ namespace MultiplayerGamePrototype.UI.Popups
         [SerializeField] private Button m_ChangeButton;
 
 
+        private void Awake()
+        {
+            Init();
+        }
+
         public override void Init()
         {
+            base.Init();
             m_CloseButton.onClick.AddListener(OnButtonClickedClose);
             m_ChangeButton.onClick.AddListener(OnButtonClickedChnage);
             SetDropdowns();

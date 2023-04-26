@@ -1,12 +1,14 @@
 using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UGS.DataControllers;
+using MultiplayerGamePrototype.UI.Core;
+using MultiplayerGamePrototype.UI.Panels.Gameplay.Items;
 using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
 
-namespace MultiplayerGamePrototype.UI.Panels.GamePanels
+namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 {
     public class UIGamePlayersScorePanel : UIBasePanel
     {
@@ -18,8 +20,10 @@ namespace MultiplayerGamePrototype.UI.Panels.GamePanels
         /// </summary>
         private Dictionary<string, UIPlayerScoreStatItem> m_ScoreItems;
 
+
         public override void Init()
         {
+            base.Init();
             UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
             UGSLobbyManager.ActionOnPlayerJoined += OnPlayerJoined;
             UGSLobbyManager.ActionOnChangedPlayersStatData += OnChangedPlayersStatData;

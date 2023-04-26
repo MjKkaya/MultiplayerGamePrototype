@@ -1,11 +1,12 @@
 using MultiplayerGamePrototype.Gameplay;
 using MultiplayerGamePrototype.ScriptableObjects;
+using MultiplayerGamePrototype.UI.Core;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.UI.Popups
+namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 {
     public class UIImmobilizedPlayerPopup : UIBasePopup
     {
@@ -17,6 +18,7 @@ namespace MultiplayerGamePrototype.UI.Popups
 
         public override void Init()
         {
+            base.Init();
             m_WaitForSeconds = new WaitForSeconds(1.0f);
             GameplayManager.ActionOnImmobilizedPlayer += OnImmobilizedPlayer;
             m_CountdownText.text = string.Empty;

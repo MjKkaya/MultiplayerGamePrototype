@@ -3,7 +3,7 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 
-namespace MultiplayerGamePrototype.UI.Panels.GamePanels
+namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Items
 {
     public class UIPlayerScoreStatItem : MonoBehaviour
     {

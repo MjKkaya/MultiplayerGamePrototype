@@ -1,6 +1,6 @@
-using MultiplayerGamePrototype.UI.Panels;
-using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.UI.Core;
 using UnityEngine;
 using UnityEngine.UI;
 

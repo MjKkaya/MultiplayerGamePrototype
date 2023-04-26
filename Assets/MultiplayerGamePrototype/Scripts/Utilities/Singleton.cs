@@ -13,7 +13,7 @@ namespace MultiplayerGamePrototype.Utilities
 {
     public class SingletonMono<T> : MonoBehaviour where T : Component
     {
-        public static T Singleton { get; private set; }
+        public static T Singleton { get; protected set; }
 
         public virtual void Awake()
         {
