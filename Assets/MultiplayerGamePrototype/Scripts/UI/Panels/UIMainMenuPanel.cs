@@ -25,7 +25,7 @@ namespace MultiplayerGamePrototype.UI.Panels
         public override void Init()
         {
             UGSAuthManager.ActionOnCompletedSignIn += OnCompletedSignIn;
-            UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
+            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
             m_QuickJoinButton.onClick.AddListener(OnButtonClickedQuickJoin);
             m_CreateGameButton.onClick.AddListener(OnButtonClickedCreateGame);
             m_JoinGameButton.onClick.AddListener(OnButtonClickedJoinGame);
@@ -96,7 +96,7 @@ namespace MultiplayerGamePrototype.UI.Panels
             Show();
         }
 
-        private void OnJoinedRelayServer()
+        private void OnStartedServer()
         {
             LoadingSceneManager.Singleton.LoadScene(SceneName.Lobby);
         }
@@ -104,8 +104,8 @@ namespace MultiplayerGamePrototype.UI.Panels
         private void OnDestroy()
         {
             UGSAuthManager.ActionOnCompletedSignIn -= OnCompletedSignIn;
-            UGSRelayManager.ActionOnJoinedRelayServer -= OnJoinedRelayServer;
-            if (m_JoinGameButton != null)
+            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
+        if (m_JoinGameButton != null)
                 m_JoinGameButton.onClick.RemoveAllListeners();
             if (m_CreateGameButton != null)
                 m_CreateGameButton.onClick.RemoveAllListeners();

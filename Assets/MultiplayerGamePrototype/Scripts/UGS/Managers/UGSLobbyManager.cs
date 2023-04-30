@@ -62,15 +62,15 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        
-
         private LobbyEventCallbacks m_LobbyEventCallbacks;
+        private Coroutine m_HeartbeatLobbyCoroutine;
 
 
         public override void Awake()
         {
             base.Awake();
-            UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
+            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
+            UGSNetworkManager.ActionOnShutdownServer += OnShutdownServer;
         }
 
 
@@ -82,6 +82,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
             m_LobbyEventCallbacks.DataChanged += OnDataChanged;
             m_LobbyEventCallbacks.PlayerLeft += OnPlayerLeft;
+            m_LobbyEventCallbacks.LobbyDeleted += OnLobbyDeleted;
             ILobbyEvents lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
 
@@ -151,7 +152,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(UGSAuthManager.MyUsername));
                 Debug.Log($"UGSLobbyManager-CreateLobbyAsync-LobbyId:{m_CurrentLobby.Id}, LobbyCode:{m_CurrentLobby.LobbyCode}");
                 await BindLobby(m_CurrentLobby.Id);
-                StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
+                m_HeartbeatLobbyCoroutine = StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
                 ActionOnCreatedLobby?.Invoke(LOBBY_MAX_PLAYERS);
                 ActionOnJoinedLobby?.Invoke();
                 return true;
@@ -275,11 +276,38 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
+        public async Task<bool> DeleteCurrentLobbyAsync()
+        {
+            Debug.Log($"UGSLobbyManager-DeleteCurrentLobbyAsync-LobbyId:{m_CurrentLobby.Id}");
+            try
+            {
+                await LobbyService.Instance.DeleteLobbyAsync(m_CurrentLobby.Id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-DeleteCurrentLobbyAsync-ex:{ex}");
+                return false;
+            }
+        }
+
+        public async void RemovePlayerAsync(string playerId)
+        {
+            try
+            {
+                await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, playerId);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-RemovePlayerAsync-ex:{ex}");
+            }
+        }
+
         #endregion
 
 
         #region HeartBbeat
-        
+
         IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float waitTimeSeconds)
         {
             Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-lobbyId:{lobbyId}");
@@ -301,10 +329,18 @@ namespace MultiplayerGamePrototype.UGS.Managers
         //  When Host joined the "Relay Server" that "Relay Server"'s join code must be share to other joined players.
         /// </summary>
         /// <param name="relayJoinCode"></param>
-        private async void OnJoinedRelayServer()
+        private async void OnStartedServer()
         {
             if(AmIhost)
                 await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(UGSRelayManager.Singleton.JoinCode));
+        }
+
+        private void OnShutdownServer()
+        {
+            m_LobbyEventCallbacks = null;
+            if (m_HeartbeatLobbyCoroutine != null)
+                StopCoroutine(m_HeartbeatLobbyCoroutine);
+            m_CurrentLobby = null;
         }
 
         private void OnApplicationQuit()
@@ -325,7 +361,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            UGSRelayManager.ActionOnJoinedRelayServer -= OnJoinedRelayServer;
+            UGSNetworkManager.ActionOnShutdownServer -= OnShutdownServer;
+            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
         }
 
         #region Lobby Events
@@ -350,10 +387,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnLobbyChanged(ILobbyChanges lobbyChanges)
         {
-            Debug.Log($"UGSLobbyManager-OnLobbyChanged-Players.Count:{m_CurrentLobby.Players.Count}");
+            if(m_CurrentLobby != null)
+                Debug.Log($"UGSLobbyManager-OnLobbyChanged-before-Players.Count:{m_CurrentLobby.Players.Count}");
             if (!lobbyChanges.LobbyDeleted)
                 lobbyChanges.ApplyToLobby(m_CurrentLobby);
-            Debug.Log($"UGSLobbyManager-OnLobbyChanged-Players.Count:{m_CurrentLobby.Players.Count}");
+            Debug.Log($"UGSLobbyManager-OnLobbyChanged-after-Players.Count:{m_CurrentLobby.Players.Count}");
         }
 
         private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> changedData)
@@ -397,6 +435,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log($"UGSLobbyManager-OnPlayerLeft-Count:{leftPlayerIds.Count}");
             //ActionOnPlayerLeft?.Invoke(leftPlayerIds);
+        }
+
+        private void OnLobbyDeleted()
+        {
+            Debug.Log("UGSLobbyManager-OnLobbyDeleted!");
+            OnShutdownServer();
         }
 
         #endregion

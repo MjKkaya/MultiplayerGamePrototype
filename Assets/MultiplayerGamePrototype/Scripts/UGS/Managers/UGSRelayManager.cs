@@ -1,9 +1,6 @@
 using System;
-using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.Utilities;
 using MultiplayerGamePrototype.UGS.DataControllers;
-using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
@@ -14,7 +11,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSRelayManager : SingletonMonoPersistent<UGSRelayManager>
     {
-        public static Action ActionOnJoinedRelayServer;
+        //public static Action ActionOnJoinedRelayServer;
         public static Action ActionOnFailedToJoinRelayServer;
 
 
@@ -24,15 +21,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
             get
             {
                 return m_JoinCode;
-            }
-        }
-
-        private RelayServerData m_RelayServerData;
-        public RelayServerData RelayServerData
-        {
-            get
-            {
-                return m_RelayServerData;
             }
         }
 
@@ -53,17 +41,13 @@ namespace MultiplayerGamePrototype.UGS.Managers
             try
             {
                 Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-                m_RelayServerData = new(allocation, "dtls");
-
+                RelayServerData relayServerData = new(allocation, "dtls");
                 try
                 {
                     m_JoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
                     Debug.Log($"UGSRelayManager-AllocateRelayServerAndGetJoinCode-joinCode:{m_JoinCode}");
-
-                    NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(m_RelayServerData);
-                    NetworkManager.Singleton.StartHost();
-                    NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-                    ActionOnJoinedRelayServer?.Invoke();
+                    UGSNetworkManager.Singleton.StartHost(relayServerData);
+                    //ActionOnJoinedRelayServer?.Invoke();
                 }
                 catch (Exception ex)
                 {
@@ -84,12 +68,10 @@ namespace MultiplayerGamePrototype.UGS.Managers
             try
             {
                 JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-                m_RelayServerData = new(joinAllocation, "dtls");
-                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(m_RelayServerData);
-                NetworkManager.Singleton.StartClient();
+                RelayServerData relayServerData = new(joinAllocation, "dtls");
+                UGSNetworkManager.Singleton.StartClient(relayServerData);
                 m_JoinCode = joinCode;
-                NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-                ActionOnJoinedRelayServer?.Invoke();
+                //ActionOnJoinedRelayServer?.Invoke();
             }
             catch (Exception ex)
             {
@@ -111,16 +93,16 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 JoinAllocationAsync(UGSLobbyDataController.GetRelayJoinCode());
         }
 
-        private void OnClientDisconnectCallback(ulong connectedClientId)
-        {
-            Debug.Log($"UGSRelayManager-OnClientDisconnectCallback-NetworkManager.Singleton.LocalClientId:{NetworkManager.Singleton.LocalClientId}, connectedClientId:{connectedClientId}, DisconnectReason:{NetworkManager.Singleton.DisconnectReason}");
-            //todo:Change the host of the lobby and create new relay connection.
-        }
+        //private void OnClientDisconnectCallback(ulong connectedClientId)
+        //{
+        //    Debug.Log($"UGSRelayManager-OnClientDisconnectCallback-NetworkManager.Singleton.LocalClientId:{NetworkManager.Singleton.LocalClientId}, connectedClientId:{connectedClientId}, DisconnectReason:{NetworkManager.Singleton.DisconnectReason}");
+        //    //todo:Change the host of the lobby and create new relay connection.
+        //}
 
         private void OnDestroy()
         {
-            if(NetworkManager.Singleton != null)
-                NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectCallback;
+            //if(NetworkManager.Singleton != null)
+            //    NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectCallback;
             UGSLobbyManager.ActionOnCreatedLobby -= OnCreatedLobby;
             UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
         }

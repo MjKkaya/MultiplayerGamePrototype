@@ -1,4 +1,5 @@
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.UI.Utilities;
 using MultiplayerGamePrototype.Utilities;
 using System;
 using System.Collections;
@@ -24,18 +25,30 @@ namespace MultiplayerGamePrototype.Core
         private SceneName m_sceneActive;
         public SceneName SceneActive => m_sceneActive;
 
+        [SerializeField] private LoadingFadeEffect m_LoadingFadeEffect;
+
 
         public override void Awake()
         {
             base.Awake();
-            UGSRelayManager.ActionOnJoinedRelayServer += OnJoinedRelayServer;
+            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
         }
 
         //We cannot subscribe in the "awake" method as we have to wait for NetworkManager.Singleton to assign it.
         private void SubscribeNetworkManager()
         {
-            NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
+            //NetworkManager.Singleton.SceneManager.VerifySceneBeforeLoading
             NetworkManager.Singleton.SceneManager.OnLoadComplete += OnLoadComplete;
+            //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+            NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneEvent;
+
+        }
+
+        private void UnsubscribeNetworkManager()
+        {
+            NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
+            //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+            NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneEvent;
         }
 
         public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
@@ -50,12 +63,9 @@ namespace MultiplayerGamePrototype.Core
         // Coroutine for the loading effect. It use an alpha in out effect
         private IEnumerator Loading(SceneName sceneToLoad, bool isNetworkSessionActive)
         {
-            //todo
-            //LoadingFadeEffect.Instance.FadeIn();
-
-            //todo
+            m_LoadingFadeEffect.FadeIn();
             // Here the player still sees the black screen
-            //yield return new WaitUntil(() => LoadingFadeEffect.s_canLoad);
+            yield return new WaitUntil(() => LoadingFadeEffect.CAN_LOAD);
 
             if (isNetworkSessionActive)
             {
@@ -72,8 +82,7 @@ namespace MultiplayerGamePrototype.Core
             // scene to load before we continue
             yield return new WaitForSeconds(1f);
 
-            //todo
-            //LoadingFadeEffect.Instance.FadeOut();
+            m_LoadingFadeEffect.FadeOut();
         }
 
         // Load the scene using the regular SceneManager, use this if there's no active network session
@@ -94,7 +103,8 @@ namespace MultiplayerGamePrototype.Core
         // network session
         private void LoadSceneNetwork(SceneName sceneToLoad)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad.ToString(), LoadSceneMode.Single);
+            SceneEventProgressStatus loadStatus = NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad.ToString(), LoadSceneMode.Single);
+            Debug.Log($"LoadingSceneManager-LoadSceneNetwork-loadStatus:{loadStatus}");
         }
 
         // This callback function gets triggered when a scene is finished loading
@@ -137,17 +147,28 @@ namespace MultiplayerGamePrototype.Core
             */
         }
 
+        private void OnSceneEvent(SceneEvent sceneEvent)
+        {
+            Debug.Log($"LoadingSceneManager-OnSceneEvent-Scene:{sceneEvent.Scene.name}, SceneEventType:{sceneEvent.SceneEventType}, ClientId:{sceneEvent.ClientId}");
+            //SceneEventType.
+            //sceneEvent.ClientsThatCompleted
+            //sceneEvent.ClientsThatTimedOut
+
+            //I Think we have to set this variable when progress start than assign to this a local SceneEvent variable!
+            //sceneEvent.AsyncOperation.progress
+        }
+
 
         #region Events
 
-        private void OnJoinedRelayServer()
+        private void OnStartedServer()
         {
             SubscribeNetworkManager();
         }
 
         private void OnDestroy()
         {
-            UGSRelayManager.ActionOnJoinedRelayServer -= OnJoinedRelayServer;
+            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
         }
 
         #endregion

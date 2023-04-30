@@ -24,17 +24,18 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         [Header("Lobby Info")]
         [SerializeField] private TextMeshProUGUI m_LobbyInfoText;
         [SerializeField] private Button m_StatsPanelControlButton;
+        [SerializeField] private Button m_LeaveButton;
 
 
         public override void Init()
         {
             base.Init();
-            UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
             UGSLobbyManager.ActionOnChangedGameBulletModeData += OnChangedGameBulletModeData;
             UGSLobbyManager.ActionOnChangedMyPlayerData += OnChangedMyPlayerData;
             m_ChangeGameBulletModeButton.onClick.AddListener(OnButtonClickedChangeGameBulletMode);
             m_ChangeMyBulletModeButton.onClick.AddListener(OnButtonClickedChangeMyBulletMode);
             m_StatsPanelControlButton.onClick.AddListener(OnButtonClickedStatsPanelControl);
+            m_LeaveButton.onClick.AddListener(OnButtonClickedLeave);
         }
 
         public override void Show()
@@ -65,12 +66,17 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
             m_ChangeGameBulletModeButton.interactable = true;
         }
 
-        #region Events
-
-        private void OnJoinedLobby()
+        // Shutdown the network session and load the menu scene
+        private void Shutdown()
         {
-            Show();
+            //if (UGSNetworkManager.Singleton.IsServer)
+            //    await UGSLobbyManager.Singleton.DeleteCurrentLobbyAsync();
+            UGSNetworkManager.Singleton.Shutdown();
+            UGSLobbyManager.Singleton.RemovePlayerAsync(UGSAuthManager.MyPlayerId);
         }
+
+
+        #region Events
 
         private void OnChangedGameBulletModeData()
         {
@@ -85,7 +91,6 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 
         private void OnDestroy()
         {
-            UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
             UGSLobbyManager.ActionOnChangedGameBulletModeData -= OnChangedGameBulletModeData;
             UGSLobbyManager.ActionOnChangedMyPlayerData -= OnChangedMyPlayerData;
             if (m_ChangeGameBulletModeButton != null)
@@ -110,6 +115,11 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         private void OnButtonClickedStatsPanelControl()
         {
             UIGameplayPanelsController.Singleton.SwitchPanel(GameplayPanels.PlayerScore);
+        }
+
+        private void OnButtonClickedLeave()
+        {
+            Shutdown();
         }
 
         #endregion

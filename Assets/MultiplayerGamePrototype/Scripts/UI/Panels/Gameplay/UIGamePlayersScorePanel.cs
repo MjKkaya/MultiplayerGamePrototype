@@ -1,11 +1,10 @@
-using MultiplayerGamePrototype.UGS.Managers;
+using System.Collections.Generic;
 using MultiplayerGamePrototype.UGS.DataControllers;
+using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UI.Core;
 using MultiplayerGamePrototype.UI.Panels.Gameplay.Items;
-using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 
 namespace MultiplayerGamePrototype.UI.Panels.Gameplay
@@ -24,9 +23,9 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         public override void Init()
         {
             base.Init();
-            UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
             UGSLobbyManager.ActionOnPlayerJoined += OnPlayerJoined;
             UGSLobbyManager.ActionOnChangedPlayersStatData += OnChangedPlayersStatData;
+            CreateStatItemsForAllLobbyPlayer();
         }
 
 
@@ -72,10 +71,6 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 
         #region Events
 
-        private void OnJoinedLobby()
-        {
-            CreateStatItemsForAllLobbyPlayer();
-        }
 
         private void OnPlayerJoined(List<string> newPlayerIds)
         {
@@ -100,15 +95,10 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 
         private void OnDestroy()
         {
-            UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
             UGSLobbyManager.ActionOnPlayerJoined -= OnPlayerJoined;
             UGSLobbyManager.ActionOnChangedPlayersStatData -= OnChangedPlayersStatData;
         }
 
         #endregion
-
-
-
-
     }
 }
