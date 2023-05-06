@@ -9,11 +9,14 @@ namespace MultiplayerGamePrototype.Gameplay.Weapons
 {
     public class NOStunBomb : NetworkBehaviour
     {
+        [SerializeField] private SOGameData m_SOGameData;
+
+
         public ulong[] CalculateEffectedPlayers()
         {
             Debug.Log("CalculateEffectedPlayers");
             List<ulong> effectedClientIdList = new();
-            Collider[] colliders = Physics.OverlapSphere(transform.position, SOGameData.Singleton.StunBombEffectAreaRadius);
+            Collider[] colliders = Physics.OverlapSphere(transform.position, m_SOGameData.StunBombEffectAreaRadius);
             int count = colliders.Length;
             Debug.Log($"CalculateEffectedPlayers-count:{count}");
             Collider Collider;
@@ -32,7 +35,7 @@ namespace MultiplayerGamePrototype.Gameplay.Weapons
 
         private void OnDrawGizmos()
         {
-            Gizmos.DrawWireSphere(transform.position, SOGameData.Singleton.StunBombEffectAreaRadius);
+            Gizmos.DrawWireSphere(transform.position, m_SOGameData.StunBombEffectAreaRadius);
         }
     }
 }

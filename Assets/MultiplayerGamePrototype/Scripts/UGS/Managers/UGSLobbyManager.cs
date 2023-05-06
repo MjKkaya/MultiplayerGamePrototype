@@ -69,20 +69,22 @@ namespace MultiplayerGamePrototype.UGS.Managers
         public override void Awake()
         {
             base.Awake();
-            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
-            UGSNetworkManager.ActionOnShutdownServer += OnShutdownServer;
+            m_LobbyEventCallbacks = new LobbyEventCallbacks();
+            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
+            UGSNetworkManager.ActionOnClientStopped += OnClientStopped;
         }
 
 
         private async Task BindLobby(string lobbyID)
         {
             Debug.Log($"UGSLobbyManager-BindLobby-lobbyID:{lobbyID}");
-            m_LobbyEventCallbacks = new LobbyEventCallbacks();
             m_LobbyEventCallbacks.LobbyChanged += OnLobbyChanged;
             m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
             m_LobbyEventCallbacks.DataChanged += OnDataChanged;
             m_LobbyEventCallbacks.PlayerLeft += OnPlayerLeft;
             m_LobbyEventCallbacks.LobbyDeleted += OnLobbyDeleted;
+            m_LobbyEventCallbacks.KickedFromLobby += OnKickedFromLobby;
+            m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
             ILobbyEvents lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
 
@@ -122,7 +124,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
         //{
 
         //}
-
 
         #region LobbyService Methods
 
@@ -295,6 +296,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             try
             {
+                Debug.Log($"UGSLobbyManager-RemovePlayerAsync-playerId:{playerId}");
                 await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, playerId);
             }
             catch (Exception ex)
@@ -335,9 +337,10 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(UGSRelayManager.Singleton.JoinCode));
         }
 
-        private void OnShutdownServer()
+        private void OnClientStopped()
         {
-            m_LobbyEventCallbacks = null;
+            m_LobbyEventCallbacks = new LobbyEventCallbacks();
+            Debug.Log($"UGSLobbyManager-OnClientStopped-m_HeartbeatLobbyCoroutine:{m_HeartbeatLobbyCoroutine}");
             if (m_HeartbeatLobbyCoroutine != null)
                 StopCoroutine(m_HeartbeatLobbyCoroutine);
             m_CurrentLobby = null;
@@ -361,11 +364,24 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            UGSNetworkManager.ActionOnShutdownServer -= OnShutdownServer;
-            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
+            UGSNetworkManager.ActionOnClientStopped -= OnClientStopped;
+            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
         }
 
         #region Lobby Events
+
+        private void OnLobbyChanged(ILobbyChanges lobbyChanges)
+        {
+            if(m_CurrentLobby == null)
+            {
+                Debug.Log("UGSLobbyManager-OnLobbyChanged-m_CurrentLobby is null!");
+                return;
+            }
+            Debug.Log($"UGSLobbyManager-OnLobbyChanged-before-Players.Count:{m_CurrentLobby.Players.Count}");
+            if (!lobbyChanges.LobbyDeleted)
+                lobbyChanges.ApplyToLobby(m_CurrentLobby);
+            Debug.Log($"UGSLobbyManager-OnLobbyChanged-after-Players.Count:{m_CurrentLobby.Players.Count}");
+        }
 
         private void OnPlayerJoined(List<LobbyPlayerJoined> joinedPlayers)
         {
@@ -385,14 +401,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
             ActionOnPlayerJoined?.Invoke(newPlayersId);
         }
 
-        private void OnLobbyChanged(ILobbyChanges lobbyChanges)
-        {
-            if(m_CurrentLobby != null)
-                Debug.Log($"UGSLobbyManager-OnLobbyChanged-before-Players.Count:{m_CurrentLobby.Players.Count}");
-            if (!lobbyChanges.LobbyDeleted)
-                lobbyChanges.ApplyToLobby(m_CurrentLobby);
-            Debug.Log($"UGSLobbyManager-OnLobbyChanged-after-Players.Count:{m_CurrentLobby.Players.Count}");
-        }
 
         private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> changedData)
         {
@@ -434,13 +442,23 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private void OnPlayerLeft(List<int> leftPlayerIds)
         {
             Debug.Log($"UGSLobbyManager-OnPlayerLeft-Count:{leftPlayerIds.Count}");
-            //ActionOnPlayerLeft?.Invoke(leftPlayerIds);
         }
 
         private void OnLobbyDeleted()
         {
             Debug.Log("UGSLobbyManager-OnLobbyDeleted!");
-            OnShutdownServer();
+        }
+
+        private void OnKickedFromLobby()
+        {
+            Debug.Log("UGSLobbyManager-OnKickedFromLobby!");
+        }
+
+        private void OnLobbyEventConnectionStateChanged(LobbyEventConnectionState connectionState)
+        {
+            Debug.Log($"UGSLobbyManager-OnLobbyEventConnectionStateChanged:{connectionState}, m_CurrentLobby:{m_CurrentLobby}");
+            if(connectionState == LobbyEventConnectionState.Unsubscribed)
+                OnClientStopped();
         }
 
         #endregion

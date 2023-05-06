@@ -3,6 +3,7 @@ using MultiplayerGamePrototype.Gameplay.NOSpawnControllers;
 using MultiplayerGamePrototype.Players;
 using MultiplayerGamePrototype.ScriptableObjects;
 using MultiplayerGamePrototype.UI.Panels.Gameplay;
+using MultiplayerGamePrototype.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,7 @@ using UnityEngine.UIElements;
 
 namespace MultiplayerGamePrototype.Gameplay
 {
-    public class GameplayManager : ManagerSingleton<GameplayManager>
+    public class GameplayManager : SingletonMono<GameplayManager>
     {
         public static Action ActionOnImmobilizedPlayer;
 
@@ -38,22 +39,27 @@ namespace MultiplayerGamePrototype.Gameplay
         public TargetObjectsSpawnController TargetObjectsSpawnController;
 
 
-        private void Awake()
+        public override void Awake()
         {
-            m_SOGameData.Init();
-            m_UIGameplayPanelsController.Init();
+            base.Awake();
+            Debug.Log("GameplayManager-Awake");
             Init();
+            m_UIGameplayPanelsController.Init();
         }
 
-        public override void Init()
+        public void Init()
         {
-            base.Init();
+            Debug.Log("GameplayManager-Init");
+            //NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
+            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
 
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
+            //Host must to create player object  for all players manually.
+            //if (NetworkManager.Singleton.IsServer)
+            //    SpawnPlayerObjectForAllConnectedPlayers();
 
-            //Host must to create own player object manually.
-            if (NetworkManager.Singleton.IsServer)
-                OnClientConnectedCallback(0);
+                
+            //... donT use here.
+            //    Set clients when trigger "LoadComplete" or "LoadEventCompleted" or 
         }
 
         public void HostPlayerSpawned()
@@ -70,11 +76,20 @@ namespace MultiplayerGamePrototype.Gameplay
         {
             if(TargetObjectsSpawnController.IsSpawnedObjectListEmpty)
             {
-                int randomCount = UnityEngine.Random.Range(SOGameData.Singleton.MinimumNumberSpawnTargetObject, SOGameData.Singleton.MinimumNumberSpawnTargetObject * 2);
+                int randomCount = UnityEngine.Random.Range(m_SOGameData.MinimumNumberSpawnTargetObject, m_SOGameData.MinimumNumberSpawnTargetObject * 2);
                 TargetObjectsSpawnController.SpawnTargetObjects(randomCount);
             }
         }
 
+
+        private void SpawnPlayerObjectForAllConnectedPlayers()
+        {
+            Debug.Log($"GameplayManager-SpawnPlayerObjectForAllConnectedPlayers-Count:{NetworkManager.Singleton.ConnectedClientsIds.Count}");
+            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                PlayerSpawnController.SpawnPlayerObject(clientId);
+            }
+        }
 
         #region Available Positions
 
@@ -127,17 +142,22 @@ namespace MultiplayerGamePrototype.Gameplay
 
         #region Events
 
+        //private void OnClientConnectedCallback(ulong connectedClientId)
+        //{
+        //    if(NetworkManager.Singleton.IsServer)
+        //        PlayerSpawnController.SpawnPlayerObject(connectedClientId);
+        //}
 
-        private void OnClientConnectedCallback(ulong connectedClientId)
+        private void OnLoadClientGameplaySceneComplete(ulong clientId)
         {
-            if(NetworkManager.Singleton.IsServer)
-                PlayerSpawnController.SpawnPlayerObject(connectedClientId);
+            PlayerSpawnController.SpawnPlayerObject(clientId);
         }
+
 
         private void OnDestroy()
         {
-            if(NetworkManager.Singleton != null)
-                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
+            Debug.Log("GameManager-OnDestroy");
+            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
         }
 
         #endregion

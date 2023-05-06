@@ -144,4 +144,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39594c4401942408286039b3466b45b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EffectAreaCollider: {fileID: 0}
+  m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}

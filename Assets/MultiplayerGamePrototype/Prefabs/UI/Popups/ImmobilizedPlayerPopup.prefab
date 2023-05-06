@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 4678954093411961274}
   - component: {fileID: 7067780416436039896}
   - component: {fileID: 2821364956887658237}
+  - component: {fileID: 8794134971743214786}
   m_Layer: 5
   m_Name: ImmobilizedPlayerPopup
   m_TagString: Untagged
@@ -225,4 +226,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7151ac5e6b634064a475c1ef14ce11c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}
   m_CountdownText: {fileID: 8765472687908112203}
+--- !u!225 &8794134971743214786
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3613926112539875354}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

@@ -18,8 +18,9 @@ namespace MultiplayerGamePrototype.Gameplay.NOSpawnControllers
         private Vector3 areaSize;
 
 
-        private void Start()
+        private void Awake()
         {
+            Debug.Log("PlayerSpawnController-Awake");
             areaSize = new Vector3(m_SpawnArea.localScale.x, 0.0f, m_SpawnArea.localScale.y);
         }
 

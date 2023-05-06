@@ -6,6 +6,7 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 
 namespace MultiplayerGamePrototype.Core
@@ -22,6 +23,8 @@ namespace MultiplayerGamePrototype.Core
 
     public class LoadingSceneManager : SingletonMonoPersistent<LoadingSceneManager>
     {
+        public static Action<ulong> ActionOnLoadClientGameplaySceneComplete;
+
         private SceneName m_sceneActive;
         public SceneName SceneActive => m_sceneActive;
 
@@ -31,31 +34,36 @@ namespace MultiplayerGamePrototype.Core
         public override void Awake()
         {
             base.Awake();
-            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
+            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
         }
 
         //We cannot subscribe in the "awake" method as we have to wait for NetworkManager.Singleton to assign it.
-        private void SubscribeNetworkManager()
+        private void SubscribeSceneManager()
         {
+            Debug.Log("LoadingSceneManager-SubscribeSceneManager");
+            //NetworkManager.Singleton.SceneManager.SetClientSynchronizationMode(LoadSceneMode.Single);
+            UnsubscribeNetworkManager();
             //NetworkManager.Singleton.SceneManager.VerifySceneBeforeLoading
             NetworkManager.Singleton.SceneManager.OnLoadComplete += OnLoadComplete;
             //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
             NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneEvent;
-
         }
 
         private void UnsubscribeNetworkManager()
         {
-            NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
-            //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
-            NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneEvent;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.SceneManager != null)
+            {
+                NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
+                //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+                NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneEvent;
+            }
         }
 
         public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
         {
-            Debug.Log($"LoadingSceneManager-LoadScene-sceneToLoad:{sceneToLoad}, isNetworkSessionActive:{isNetworkSessionActive}");
-            //if (sceneToLoad == SceneName.Main)
-            //    SubscribeNetworkManager();
+            Debug.Log($"LoadingSceneManager-LoadScene-m_sceneActive:{m_sceneActive}, sceneToLoad:{sceneToLoad}, isNetworkSessionActive:{isNetworkSessionActive}");
+            //if (NetworkManager.Singleton.IsServer && sceneToLoad == SceneName.Lobby && m_sceneActive < SceneName.Lobby)
+            //    StartCoroutine(SubscribeSceneManager());
 
             StartCoroutine(Loading(sceneToLoad, isNetworkSessionActive));
         }
@@ -97,6 +105,7 @@ namespace MultiplayerGamePrototype.Core
                     //    AudioManager.Instance.PlayMusic(AudioManager.MusicName.intro);
                     break;
             }
+            m_sceneActive = sceneToLoad;
         }
 
         // Load the scene using the SceneManager from NetworkManager. Use this when there is an active
@@ -113,10 +122,14 @@ namespace MultiplayerGamePrototype.Core
         {
             // We only care the host/server is loading because every manager handles
             // their information and behavior on the server runtime
+            Debug.Log($"LoadingSceneManager-OnLoadComplete-clientId:{clientId}, sceneName:{sceneName}, loadSceneMode:{loadSceneMode}");
             if (!NetworkManager.Singleton.IsServer)
                 return;
 
             Enum.TryParse(sceneName, out m_sceneActive);
+
+            if(m_sceneActive == SceneName.Gameplay)
+                ActionOnLoadClientGameplaySceneComplete?.Invoke(clientId);
 
             //todo
             /*
@@ -147,9 +160,14 @@ namespace MultiplayerGamePrototype.Core
             */
         }
 
+        private void OnLoadEventCompleted(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
+        {
+            Debug.Log($"LoadingSceneManager-OnLoadEventCompleted");
+        }
+
         private void OnSceneEvent(SceneEvent sceneEvent)
         {
-            Debug.Log($"LoadingSceneManager-OnSceneEvent-Scene:{sceneEvent.Scene.name}, SceneEventType:{sceneEvent.SceneEventType}, ClientId:{sceneEvent.ClientId}");
+            Debug.Log($"LoadingSceneManager-OnSceneEvent-Scene:{sceneEvent.Scene.name}/{sceneEvent.Scene.buildIndex}, SceneEventType:{sceneEvent.SceneEventType}, ClientId:{sceneEvent.ClientId}");
             //SceneEventType.
             //sceneEvent.ClientsThatCompleted
             //sceneEvent.ClientsThatTimedOut
@@ -163,12 +181,14 @@ namespace MultiplayerGamePrototype.Core
 
         private void OnStartedServer()
         {
-            SubscribeNetworkManager();
+            SubscribeSceneManager();
         }
 
         private void OnDestroy()
         {
-            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
+            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
+            UnsubscribeNetworkManager();
+            
         }
 
         #endregion

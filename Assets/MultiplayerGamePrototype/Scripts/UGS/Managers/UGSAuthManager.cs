@@ -1,17 +1,17 @@
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.Utilities;
+using System;
+using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using UnityEngine;
-using UnityEngine.Events;
 
 
 namespace MultiplayerGamePrototype.UGS.Managers
 {
-    public class UGSAuthManager : ManagerSingleton<UGSAuthManager>
+    public class UGSAuthManager : SingletonMonoPersistent<UGSAuthManager>
     {
-        public static UnityAction ActionOnCompletedSignIn;
+        public static Action ActionOnCompletedSignIn;
 
         private static string m_MyPlayerId;
         public static string MyPlayerId => m_MyPlayerId;
@@ -19,18 +19,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private static string m_MyUsername;
         public static string MyUsername => m_MyUsername;
 
-
-        private void Awake()
-        {
-            DontDestroyOnLoad(gameObject);
-            Init();
-        }
-
-        public override void Init()
-        {
-            base.Init();
-            Debug.Log("UGSAuthManager-Init");
-        }
 
         public async Task<bool> SignInAnonymouslyAsync(string username)
         {

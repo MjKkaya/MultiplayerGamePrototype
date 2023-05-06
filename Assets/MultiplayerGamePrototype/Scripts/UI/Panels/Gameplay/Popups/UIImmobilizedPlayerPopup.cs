@@ -10,6 +10,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 {
     public class UIImmobilizedPlayerPopup : UIBasePopup
     {
+        [SerializeField] private SOGameData m_SOGameData;
         [SerializeField] private TextMeshProUGUI m_CountdownText;
 
         private WaitForSeconds m_WaitForSeconds;
@@ -34,7 +35,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 
         private IEnumerator  StartCountDown()
         {
-            float waitingTime = SOGameData.Singleton.PlyaerImmobilizedTime;
+            float waitingTime = m_SOGameData.PlyaerImmobilizedTime;
             do
             {
                 m_CountdownText.text = waitingTime.ToString("f0");

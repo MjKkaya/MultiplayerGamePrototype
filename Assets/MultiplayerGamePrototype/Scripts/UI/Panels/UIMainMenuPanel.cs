@@ -25,7 +25,7 @@ namespace MultiplayerGamePrototype.UI.Panels
         public override void Init()
         {
             UGSAuthManager.ActionOnCompletedSignIn += OnCompletedSignIn;
-            UGSNetworkManager.ActionOnStartedServer += OnStartedServer;
+            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
             m_QuickJoinButton.onClick.AddListener(OnButtonClickedQuickJoin);
             m_CreateGameButton.onClick.AddListener(OnButtonClickedCreateGame);
             m_JoinGameButton.onClick.AddListener(OnButtonClickedJoinGame);
@@ -104,7 +104,7 @@ namespace MultiplayerGamePrototype.UI.Panels
         private void OnDestroy()
         {
             UGSAuthManager.ActionOnCompletedSignIn -= OnCompletedSignIn;
-            UGSNetworkManager.ActionOnStartedServer -= OnStartedServer;
+            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
         if (m_JoinGameButton != null)
                 m_JoinGameButton.onClick.RemoveAllListeners();
             if (m_CreateGameButton != null)

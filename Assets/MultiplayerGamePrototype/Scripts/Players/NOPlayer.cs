@@ -26,6 +26,16 @@ namespace MultiplayerGamePrototype.Players
         [SerializeField] private FirstPersonController m_FirstPersonController;
 
 
+        private void Awake()
+        {
+            Debug.Log($"{name}-Awake");
+        }
+
+        private void Start()
+        {
+            Debug.Log($"{name}-Start");
+        }
+
         public override void OnNetworkSpawn()
         {
             Debug.Log($"{name}-OnNetworkSpawn-IsServer:{IsServer}, pos:{transform.position}");

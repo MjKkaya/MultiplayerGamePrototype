@@ -11,9 +11,9 @@ using UnityEngine;
 namespace MultiplayerGamePrototype.UGS.Managers
 {
     [RequireComponent(typeof(NetworkManager))]
-    public class UGSNetworkManager : SingletonMonoPersistent<UGSNetworkManager>
+    public class UGSNetworkManager : SingletonMono<UGSNetworkManager>
     {
-        public bool IsServer
+        public bool IsHost
         {
             get
             {
@@ -24,11 +24,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        //todo: is this class neccesary?
-        //public static Action ActionOnInitilized;
-        //public static Action ActionOnSceneManagerInitilized;
-        public static Action ActionOnShutdownServer;
-        public static Action ActionOnStartedServer;
+        public static Action ActionOnClientStopped;
+        public static Action ActionOnServerStarted;
 
         private NetworkManager m_NetworkManager;
 
@@ -37,7 +34,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             base.Awake();
             m_NetworkManager = GetComponent<NetworkManager>();
-            //StartCoroutine(CheckSingletonInitialization());
         }
 
         /// <summary>
@@ -52,83 +48,98 @@ namespace MultiplayerGamePrototype.UGS.Managers
             LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
         }
 
-       
-        //IEnumerator CheckSingletonInitialization()
-        //{
-        //    do
-        //    {
-        //        yield return null;
-        //        Debug.Log("UGSNetworkManager-CheckSingletonInitialization-while");
-        //    } while (NetworkManager.Singleton == null);
-
-        //    Debug.Log("UGSNetworkManager-CheckSingletonInitialization-END");
-        //    //ActionOnInitilized?.Invoke();
-        //    SetCallbacks(true);
-        //}
-
-        private void SetCallbacks(bool isActive)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
-            ActionOnStartedServer?.Invoke();
-        }
-
-        /*
-        IEnumerator CheckSceneManagerInitialization()
-        {
-            Debug.Log("UGSNetworkManager-CheckSceneManagerInitialization");
-            do
-            {
-                yield return null;
-                Debug.Log("UGSNetworkManager-CheckSceneManagerInitialization-while");
-            } while (NetworkManager.Singleton.SceneManager == null);
-
-            ActionOnSceneManagerInitilized?.Invoke();
-            Debug.Log("UGSNetworkManager-CheckSceneManagerInitialization-END!");
-        }
-        */
-
-
         public void StartHost(RelayServerData relayServerData)
         {
+            SetCallbacks(true);
             m_NetworkManager.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
             bool isSucceed = m_NetworkManager.StartHost();
-            if(isSucceed)
-                SetCallbacks(true);
+            if(!isSucceed)
+                SetCallbacks(false);
         }
 
         public void StartClient(RelayServerData relayServerData)
         {
+            SetCallbacks(true);
             m_NetworkManager.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
             bool isSucceed = m_NetworkManager.StartClient();
-            if (isSucceed)
-                SetCallbacks(true);
+            if (!isSucceed)
+                SetCallbacks(false);
+        }
+
+
+        private void SetCallbacks(bool isActive)
+        {
+            Debug.Log($"UGSNetworkManager-SetCallbacks-isActive:{isActive}");
+            if(isActive)
+            {
+                m_NetworkManager.OnClientConnectedCallback += OnClientConnectedCallback;
+                m_NetworkManager.OnClientDisconnectCallback += OnClientDisconnectCallback;
+                m_NetworkManager.OnServerStarted += OnServerStarted;
+                m_NetworkManager.OnServerStopped += OnServerStopped;
+                m_NetworkManager.OnClientStarted += OnClientStarted;
+                m_NetworkManager.OnClientStopped += OnClientStopped;
+            }
+            else
+            {
+                m_NetworkManager.OnClientConnectedCallback -= OnClientConnectedCallback;
+                m_NetworkManager.OnClientDisconnectCallback -= OnClientDisconnectCallback;
+                m_NetworkManager.OnServerStarted -= OnServerStarted;
+                m_NetworkManager.OnServerStopped -= OnServerStopped;
+                m_NetworkManager.OnClientStarted -= OnClientStarted;
+                m_NetworkManager.OnClientStopped -= OnClientStopped;
+            }
         }
 
 
         #region Events
 
+        private void OnServerStarted()
+        {
+            Debug.Log("UGSNetworkManager-OnServerStarted");
+            ActionOnServerStarted?.Invoke();
+        }
+
+        private void OnServerStopped(bool isStop)
+        {
+            Debug.Log($"UGSNetworkManager-OnServerStopped-isStop:{isStop}");
+        }
+
+        private void OnClientStarted()
+        {
+            Debug.Log("UGSNetworkManager-OnClientStarted");
+        }
+
+        private void OnClientStopped(bool isStop)
+        {
+            Debug.Log($"UGSNetworkManager-OnClientStopped-isStop:{isStop}");
+            SetCallbacks(false);
+            ActionOnClientStopped?.Invoke();
+            LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
+        }
+
         private void OnClientConnectedCallback(ulong connectedClientId)
         {
             Debug.Log($"UGSNetworkManager-OnClientConnectedCallback-connectedClientId:{connectedClientId}");
-            //StartCoroutine(CheckSceneManagerInitialization());
         }
 
         private void OnClientDisconnectCallback(ulong disconnectedClient)
         {
             Debug.Log($"UGSNetworkManager-OnClientDisconnectCallback-disconnectedClient:{disconnectedClient}, ServerClientId:{NetworkManager.ServerClientId}, LocalClientId:{m_NetworkManager.LocalClientId}");
-            if(disconnectedClient == NetworkManager.ServerClientId || disconnectedClient == m_NetworkManager.LocalClientId)
-            {
-                SetCallbacks(false);
-                ActionOnShutdownServer?.Invoke();
-                LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
-            }
+            //todo : will delete
+            //if(disconnectedClient == NetworkManager.ServerClientId || disconnectedClient == m_NetworkManager.LocalClientId)
+            //{
+            //    SetCallbacks(false);
+            //    ActionOnShutdownServer?.Invoke();
+            //    LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
+            //}
         }
 
         private void OnDestroy()
         {
-            if(NetworkManager.Singleton != null)
-                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
+            if(m_NetworkManager != null)
+            {
+                SetCallbacks(false);
+            }
         }
 
         #endregion
