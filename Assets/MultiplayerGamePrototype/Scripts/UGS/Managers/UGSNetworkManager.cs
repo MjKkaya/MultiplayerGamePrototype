@@ -24,8 +24,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public static Action ActionOnClientStopped;
-        public static Action ActionOnServerStarted;
+        public static event Action ActionOnClientStopped;
+        public static event Action ActionOnServerStarted;
 
         private NetworkManager m_NetworkManager;
 

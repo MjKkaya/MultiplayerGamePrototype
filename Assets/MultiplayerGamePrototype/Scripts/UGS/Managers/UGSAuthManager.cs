@@ -11,7 +11,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSAuthManager : SingletonMonoPersistent<UGSAuthManager>
     {
-        public static Action ActionOnCompletedSignIn;
+        public static event Action ActionOnCompletedSignIn;
 
         private static string m_MyPlayerId;
         public static string MyPlayerId => m_MyPlayerId;

@@ -4,6 +4,7 @@ using MultiplayerGamePrototype.Players;
 using MultiplayerGamePrototype.ScriptableObjects;
 using MultiplayerGamePrototype.UI.Panels.Gameplay;
 using MultiplayerGamePrototype.Utilities;
+using MultiplayerGamePrototype.UGS.Utilities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace MultiplayerGamePrototype.Gameplay
 {
     public class GameplayManager : SingletonMono<GameplayManager>
     {
-        public static Action ActionOnImmobilizedPlayer;
+        public static event Action ActionOnImmobilizedPlayer;
 
         [SerializeField]
         private Camera m_MainCamera;
@@ -29,6 +30,13 @@ namespace MultiplayerGamePrototype.Gameplay
         public NOPlayerFPSController FPSController{
             get{
                 return m_FPSController;
+            }
+        }
+
+        [SerializeField] private SinglePooledDynamicSpawner m_StunBombSinglePool;
+        public SinglePooledDynamicSpawner StunBombSinglePool{
+            get{
+                return m_StunBombSinglePool;
             }
         }
 

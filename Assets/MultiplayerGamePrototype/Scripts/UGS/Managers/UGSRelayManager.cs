@@ -11,8 +11,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSRelayManager : SingletonMonoPersistent<UGSRelayManager>
     {
-        //public static Action ActionOnJoinedRelayServer;
-        public static Action ActionOnFailedToJoinRelayServer;
+        //public static event Action ActionOnJoinedRelayServer;
+        public static event Action ActionOnFailedToJoinRelayServer;
 
 
         private string m_JoinCode;

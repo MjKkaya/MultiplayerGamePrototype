@@ -33,6 +33,7 @@ namespace MultiplayerGamePrototype.Gameplay.Weapons
             return effectedClientIdList.ToArray();
         }
 
+
         private void OnDrawGizmos()
         {
             Gizmos.DrawWireSphere(transform.position, m_SOGameData.StunBombEffectAreaRadius);

@@ -16,12 +16,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
     {
         private static readonly int LOBBY_MAX_PLAYERS = 10;
 
-        public static Action<List<string>> ActionOnPlayerJoined;
-        public static Action<int> ActionOnCreatedLobby;
-        public static Action ActionOnJoinedLobby;
-        public static Action ActionOnChangedMyPlayerData;
-        public static Action ActionOnChangedGameBulletModeData;
-        public static Action<string, string> ActionOnChangedPlayersStatData;
+        public static event Action<List<string>> ActionOnPlayerJoined;
+        public static event Action<int> ActionOnCreatedLobby;
+        public static event Action ActionOnJoinedLobby;
+        public static event Action ActionOnChangedMyPlayerData;
+        public static event Action ActionOnChangedGameBulletModeData;
+        public static event Action<string, string> ActionOnChangedPlayersStatData;
 
 
         private static Lobby m_CurrentLobby;
@@ -341,7 +341,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             m_LobbyEventCallbacks = new LobbyEventCallbacks();
             Debug.Log($"UGSLobbyManager-OnClientStopped-m_HeartbeatLobbyCoroutine:{m_HeartbeatLobbyCoroutine}");
-            if (m_HeartbeatLobbyCoroutine != null)
+            if (gameObject != null && m_HeartbeatLobbyCoroutine != null)
                 StopCoroutine(m_HeartbeatLobbyCoroutine);
             m_CurrentLobby = null;
         }
@@ -364,8 +364,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            UGSNetworkManager.ActionOnClientStopped -= OnClientStopped;
             UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
+            UGSNetworkManager.ActionOnClientStopped -= OnClientStopped;
         }
 
         #region Lobby Events

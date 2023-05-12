@@ -13,7 +13,6 @@ namespace MultiplayerGamePrototype.Players
         //"Time required to wait before being able to fire the bomd
         private static float BOMB_TIMEOUT = 5f;
 
-        [SerializeField] Transform m_BombPrefab;
         [SerializeField] Transform m_BombDeployPosition;
         [SerializeField] private StarterAssetsInputs m_StarterAssetsInputs;
 
@@ -53,22 +52,23 @@ namespace MultiplayerGamePrototype.Players
         }
 
 
+        #region RPC
+
         [ServerRpc]
         public void DeployTheBombServerRPC()
         {
             Debug.Log($"{name}-DeployTheBombServerRPC!");
-            Transform newGameObject = Object.Instantiate(m_BombPrefab, m_BombDeployPosition);
-
-            // Replicating that same new instance to all connected clients
-            m_BombNetworkObject = newGameObject.GetComponent<NetworkObject>();
-            m_BombNetworkObject.Spawn();
+            //// Replicating that same new instance to all connected clients
+            m_BombNetworkObject = GameplayManager.Singleton.StunBombSinglePool.SpawnInstance(m_BombDeployPosition.position);
         }
-
 
         [ServerRpc]
         public void FireTheBombServerRPC()
         {
             Debug.Log($"{name}-FireTheBombServerRPC!");
+            if (m_BombNetworkObject == null)
+                return;
+
             ulong[] effectedClientIds = m_BombNetworkObject.GetComponent<NOStunBomb>().CalculateEffectedPlayers();
             m_BombNetworkObject.Despawn();
             FireTheBombClientRPC();
@@ -82,12 +82,18 @@ namespace MultiplayerGamePrototype.Players
             ImmobilizPlayerClientRPC(clientRpcParams);
         }
 
+        /// <summary>
+        /// Reaches all players.
+        /// </summary>
         [ClientRpc]
         public void FireTheBombClientRPC()
         {
             Debug.Log($"{name}-FireTheBombClientRPC!");
         }
 
+        /// <summary>
+        /// Reaches just effected players.
+        /// </summary>
         [ClientRpc]
         public void ImmobilizPlayerClientRPC(ClientRpcParams clientRpcParams = default)
         {
@@ -95,6 +101,10 @@ namespace MultiplayerGamePrototype.Players
             GameplayManager.Singleton.PlayerImmobilized();
         }
 
+        #endregion
+
+
+        #region Events
 
         private void Update()
         {
@@ -120,5 +130,7 @@ namespace MultiplayerGamePrototype.Players
             if (m_bombWaitingTimeoutDelta > 0)
                 m_bombWaitingTimeoutDelta -= Time.deltaTime;
         }
+
+        #endregion
     }
 }

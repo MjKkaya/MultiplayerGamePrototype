@@ -23,7 +23,7 @@ namespace MultiplayerGamePrototype.Core
 
     public class LoadingSceneManager : SingletonMonoPersistent<LoadingSceneManager>
     {
-        public static Action<ulong> ActionOnLoadClientGameplaySceneComplete;
+        public static event Action<ulong> ActionOnLoadClientGameplaySceneComplete;
 
         private SceneName m_sceneActive;
         public SceneName SceneActive => m_sceneActive;

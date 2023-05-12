@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MultiplayerGamePrototype.UGS.Utilities;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -54,7 +55,8 @@ namespace MultiplayerGamePrototype.Gameplay.NOSpawnControllers
                     }
                 }
                 randomPos = new Vector3(randomPos.x, yPos * 2, randomPos.z);
-                networkObject = Object.Instantiate(m_TragetObjectPrefab, randomPos, Quaternion.identity).GetComponent<NetworkObject>();
+
+                networkObject = NetworkObjectPool.Singleton.GetNetworkObject(m_TragetObjectPrefab.gameObject, randomPos, Quaternion.identity);
                 networkObject.Spawn();
                 m_SpawnedTargetObjects.Add(networkObject);
             }
