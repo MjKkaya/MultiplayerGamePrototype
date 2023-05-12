@@ -1,6 +1,7 @@
 using Unity.Netcode.Components;
 using UnityEngine;
 
+
 namespace MultiplayerGamePrototype.UGS.Utilities
 {
     /// <summary>

@@ -1,5 +1,7 @@
 using DG.Tweening;
+using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.UI.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,23 +11,22 @@ namespace MultiplayerGamePrototype.UI.Panels
 {
     public class UIMainMenuPanel : UIBasePanel
     {
-        private string Username{
-            get{
-                return m_UsernameInput.text.Length == 0 ? "Player-" : m_UsernameInput.text;
-            }
-        }
-
-
-        [SerializeField] TMP_InputField m_UsernameInput;
-        [SerializeField] TMP_InputField m_LobbyCodeInput;
         [SerializeField] Button m_CreateGameButton;
+        [SerializeField] Button m_QuickJoinButton;
         [SerializeField] Button m_JoinGameButton;
+        [SerializeField] TMP_InputField m_LobbyCodeInput;
 
+
+        private void OnEnable()
+        {
+            Init();
+        }
 
         public override void Init()
         {
             UGSAuthManager.ActionOnCompletedSignIn += OnCompletedSignIn;
-            UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
+            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
+            m_QuickJoinButton.onClick.AddListener(OnButtonClickedQuickJoin);
             m_CreateGameButton.onClick.AddListener(OnButtonClickedCreateGame);
             m_JoinGameButton.onClick.AddListener(OnButtonClickedJoinGame);
         }
@@ -33,24 +34,27 @@ namespace MultiplayerGamePrototype.UI.Panels
 
         private async void CreateLobby()
         {
-            string username = GetUsername();
-            if (username != null)
-            {
-                SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Singleton.CreateLobbyAsync(Username);
-                if(!isSucceed)
-                    SetInteractablePanelButtons(true);
-            }
+            SetInteractablePanelButtons(false);
+            bool isSucceed = await UGSLobbyManager.Singleton.CreateLobbyAsync();
+            if(!isSucceed)
+                SetInteractablePanelButtons(true);
+        }
+
+        private async void QuickJoin()
+        {
+            SetInteractablePanelButtons(false);
+            bool isSucceed = await UGSLobbyManager.Singleton.QuickJoinLobbyAsync();
+            if (!isSucceed)
+                CreateLobby();
         }
 
         private async void JoinLobby()
         {
-            string username = GetUsername();
             string lobbyCode = GetLobbyCode();
-            if (username != null && lobbyCode != null)
+            if (lobbyCode != null)
             {
                 SetInteractablePanelButtons(false);
-                bool isSucceed = await UGSLobbyManager.Singleton.JoinLobbyByCodeAsync(lobbyCode, username);
+                bool isSucceed = await UGSLobbyManager.Singleton.JoinLobbyByCodeAsync(lobbyCode);
                 if (!isSucceed)
                     SetInteractablePanelButtons(true);
 
@@ -66,20 +70,8 @@ namespace MultiplayerGamePrototype.UI.Panels
         private void SetInteractablePanelButtons(bool isActive)
         {
             m_CreateGameButton.interactable = isActive;
+            m_QuickJoinButton.interactable = isActive;
             m_JoinGameButton.interactable = isActive;
-        }
-
-        private string GetUsername()
-        {
-            if (m_UsernameInput.text.Length > 0)
-            {
-                return m_UsernameInput.text;
-            }
-            else
-            {
-                m_UsernameInput.transform.DOShakePosition(0.75f, 30 ,100, 360);
-                return null;
-            }
         }
 
         private string GetLobbyCode()
@@ -104,16 +96,16 @@ namespace MultiplayerGamePrototype.UI.Panels
             Show();
         }
 
-        private void OnJoinedLobby()
+        private void OnStartedServer()
         {
-            Hide();
+            LoadingSceneManager.Singleton.LoadScene(SceneName.Lobby);
         }
 
         private void OnDestroy()
         {
             UGSAuthManager.ActionOnCompletedSignIn -= OnCompletedSignIn;
-            UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
-            if (m_JoinGameButton != null)
+            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
+        if (m_JoinGameButton != null)
                 m_JoinGameButton.onClick.RemoveAllListeners();
             if (m_CreateGameButton != null)
                 m_CreateGameButton.onClick.RemoveAllListeners();
@@ -125,6 +117,11 @@ namespace MultiplayerGamePrototype.UI.Panels
         {
             CreateLobby();
 
+        }
+
+        private void OnButtonClickedQuickJoin()
+        {
+            QuickJoin();
         }
 
         private void OnButtonClickedJoinGame()

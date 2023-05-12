@@ -57,12 +57,12 @@ namespace StarterAssets
             BombInput(value.isPressed);
         }
 
-        public void OnMouseLock(InputValue value)
-        {
-            //MouseLockInput(value.isPressed);
-			cursorLocked = !cursorLocked;
-			cursorInputForLook = !cursorInputForLook;
-        }
+   //     public void OnMouseLock(InputValue value)
+   //     {
+   //         //MouseLockInput(value.isPressed);
+			//cursorLocked = !cursorLocked;
+			//cursorInputForLook = !cursorInputForLook;
+   //     }
 #endif
 
 

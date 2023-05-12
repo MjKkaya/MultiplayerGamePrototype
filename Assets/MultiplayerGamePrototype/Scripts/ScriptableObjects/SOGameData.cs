@@ -1,12 +1,10 @@
-using MultiplayerGamePrototype.Core;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
 namespace MultiplayerGamePrototype.ScriptableObjects
 {
     [CreateAssetMenu(fileName = "GameData", menuName = "MultiplayerGamePrototype/Data/GameData")]
-    public class SOGameData : ScriptableObjectSingleton<SOGameData>
+    public class SOGameData : ScriptableObject
     {
         [SerializeField]
         [Tooltip("When the bomb is fired, surrounding players remain immobilized for the duration.\nValue type is seconds")]

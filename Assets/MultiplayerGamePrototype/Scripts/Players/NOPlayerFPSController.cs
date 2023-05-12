@@ -1,10 +1,9 @@
 using Cinemachine;
 using MultiplayerGamePrototype.ScriptableObjects;
-using MultiplayerGamePrototype.Game;
+using MultiplayerGamePrototype.Gameplay;
 using StarterAssets;
 using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -56,12 +55,12 @@ namespace MultiplayerGamePrototype.Players
 
         private void Awake()
         {
-            GameManager.ActionOnImmobilizedPlayer += ImmobilizedPlayer;
+            GameplayManager.ActionOnImmobilizedPlayer += ImmobilizedPlayer;
         }
 
         private void OnDestroy()
         {
-            GameManager.ActionOnImmobilizedPlayer -= ImmobilizedPlayer;
+            GameplayManager.ActionOnImmobilizedPlayer -= ImmobilizedPlayer;
         }
 
         #endregion
