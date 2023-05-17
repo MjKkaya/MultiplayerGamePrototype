@@ -56,7 +56,7 @@ namespace MultiplayerGamePrototype.Players
             Debug.Log($"{name}-InitFPSControls");
             m_FirstPersonController.enabled = true;
             m_PlayerInput.enabled = true;
-            GameplayManager.Singleton.FPSController.SetFPSPlayer(m_TransformPlayerCameraRoot, m_PlayerInput, m_StarterAssetsInputs);
+            GameplayManager.Singleton.SetInputs(m_TransformPlayerCameraRoot, m_PlayerInput, m_StarterAssetsInputs);
             if (IsServer)
                 GameplayManager.Singleton.HostPlayerSpawned();
         }

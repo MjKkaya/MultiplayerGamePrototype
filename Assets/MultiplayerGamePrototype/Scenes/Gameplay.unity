@@ -444,6 +444,7 @@ MonoBehaviour:
   m_CinemachineVirtualCamera: {fileID: 1820831473}
   m_UICanvasControllerInput: {fileID: 1489630050}
   m_MobileDisableAutoSwitchControls: {fileID: 1489630048}
+  m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}
 --- !u!4 &617119754
 Transform:
   m_ObjectHideFlags: 0
@@ -652,12 +653,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MainCamera: {fileID: 856481345}
-  m_FPSController: {fileID: 617119753}
   m_StunBombSinglePool: {fileID: 1261482196}
-  m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}
-  m_UIGameplayPanelsController: {fileID: 637236260}
   PlayerSpawnController: {fileID: 637236258}
   TargetObjectsSpawnController: {fileID: 637236257}
+  m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}
+  m_UIGameplayPanelsController: {fileID: 637236260}
+  m_FPSController: {fileID: 617119753}
 --- !u!114 &637236260
 MonoBehaviour:
   m_ObjectHideFlags: 0

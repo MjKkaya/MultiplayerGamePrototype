@@ -14,19 +14,19 @@ namespace MultiplayerGamePrototype.Gameplay.Weapons
 
         public ulong[] CalculateEffectedPlayers()
         {
-            Debug.Log("CalculateEffectedPlayers");
             List<ulong> effectedClientIdList = new();
             Collider[] colliders = Physics.OverlapSphere(transform.position, m_SOGameData.StunBombEffectAreaRadius);
             int count = colliders.Length;
-            Debug.Log($"CalculateEffectedPlayers-count:{count}");
+            Debug.Log($"NOStunBomb-CalculateEffectedPlayers-count:{count}");
             Collider Collider;
             for (int i = 0; i < count; i++)
             {
                 Collider = colliders[i];
                 if (Collider.CompareTag("Player"))
                 {
-                    Debug.Log($"NOStunBomb-Name:{Collider.transform.name}, id:{Collider.transform.GetComponent<NOPlayer>().OwnerClientId}");
-                    effectedClientIdList.Add(Collider.transform.GetComponent<NOPlayer>().OwnerClientId);
+                    ulong ownerId = Collider.GetComponentInParent<NOPlayer>().OwnerClientId;
+                    Debug.Log($"NOStunBomb-CalculateEffectedPlayers-Name:{Collider.transform.name}, ownerId:{ownerId}");
+                    effectedClientIdList.Add(ownerId);
                 }
             }
 

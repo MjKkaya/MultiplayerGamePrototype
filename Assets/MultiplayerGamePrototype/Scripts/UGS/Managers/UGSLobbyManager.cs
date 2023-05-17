@@ -354,7 +354,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             try
             {
                 Debug.Log("UGSLobbyManager-OnApplicationQuit");
-                LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, UGSAuthManager.MyPlayerId);
+                RemovePlayerAsync(UGSAuthManager.MyPlayerId);
             }
             catch (System.Exception ex)
             {

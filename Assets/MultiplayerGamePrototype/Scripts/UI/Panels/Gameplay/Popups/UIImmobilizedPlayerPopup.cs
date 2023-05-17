@@ -19,6 +19,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 
         public override void Init()
         {
+            Debug.Log("UIImmobilizedPlayerPopup-Init");
             base.Init();
             m_WaitForSeconds = new WaitForSeconds(1.0f);
             GameplayManager.ActionOnImmobilizedPlayer += OnImmobilizedPlayer;
@@ -27,6 +28,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 
         public override void Show()
         {
+            Debug.Log("UIImmobilizedPlayerPopup-Show");
             base.Show();
             if (m_StartCountDown != null)
                 StopCoroutine(m_StartCountDown);
@@ -51,11 +53,13 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay.Popups
 
         private void OnImmobilizedPlayer()
         {
+            Debug.Log("UIImmobilizedPlayerPopup-OnImmobilizedPlayer");
             Show();
         }
 
         private void OnDestroy()
         {
+            Debug.Log("UIImmobilizedPlayerPopup-OnDestroy");
             GameplayManager.ActionOnImmobilizedPlayer -= OnImmobilizedPlayer;
         }
 

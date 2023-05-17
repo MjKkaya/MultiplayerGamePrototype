@@ -15,18 +15,21 @@ namespace MultiplayerGamePrototype.Players
         [SerializeField] private CinemachineVirtualCamera m_CinemachineVirtualCamera;
         [SerializeField] private UICanvasControllerInput m_UICanvasControllerInput;
         [SerializeField] private MobileDisableAutoSwitchControls m_MobileDisableAutoSwitchControls;
+        [SerializeField] private SOGameData m_SOGameData;
 
         private Coroutine m_ImmobilizedCoroutine;
+        private PlayerInput m_PlayerInput;
 
         /// <summary>
         ///FPS chracter is a network object,  because of this we have to assign some components after that instance created.
         /// </summary>
         /// <param name="transform">FPS character camera control</param>
         /// <param name="starterAssetsInputs">For FPS charceter inputs</param>
-        public void SetFPSPlayer(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
+        public void SetPlayer(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
         {
             m_CinemachineVirtualCamera.Follow = followingObject;
             m_UICanvasControllerInput.starterAssetsInputs = starterAssetsInputs;
+            m_PlayerInput = playerInput;
 #if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
             m_MobileDisableAutoSwitchControls.playerInput = playerInput;
 #endif
@@ -34,17 +37,20 @@ namespace MultiplayerGamePrototype.Players
         }
 
         IEnumerator ImmobilizedCoroutine()
-        {
-#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
-            m_MobileDisableAutoSwitchControls.playerInput.enabled = false;
-            yield return new WaitForSeconds(SOGameData.Singleton.PlyaerImmobilizedTime);
-            m_MobileDisableAutoSwitchControls.playerInput.enabled = true;
-#else
-            yield return null;
-#endif
-        }
-
+         {
+            m_PlayerInput.enabled = false;
+            yield return new WaitForSeconds(m_SOGameData.PlyaerImmobilizedTime);
+            m_PlayerInput.enabled = true;
+ //#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
+ //            m_MobileDisableAutoSwitchControls.playerInput.enabled = false;
+ //            m_MobileDisableAutoSwitchControls.playerInput.enabled = true;
+ //#else
+ //            yield return null;
+ //#endif
+         }
+        
         #region Events
+
 
         private void ImmobilizedPlayer()
         {

@@ -125,13 +125,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private void OnClientDisconnectCallback(ulong disconnectedClient)
         {
             Debug.Log($"UGSNetworkManager-OnClientDisconnectCallback-disconnectedClient:{disconnectedClient}, ServerClientId:{NetworkManager.ServerClientId}, LocalClientId:{m_NetworkManager.LocalClientId}");
-            //todo : will delete
-            //if(disconnectedClient == NetworkManager.ServerClientId || disconnectedClient == m_NetworkManager.LocalClientId)
-            //{
-            //    SetCallbacks(false);
-            //    ActionOnShutdownServer?.Invoke();
-            //    LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
-            //}
         }
 
         private void OnDestroy()

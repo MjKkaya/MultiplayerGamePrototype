@@ -1,8 +1,10 @@
+using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using MultiplayerGamePrototype.UI.Core;
 using MultiplayerGamePrototype.Utilities;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 namespace MultiplayerGamePrototype.UI.Panels.Gameplay
@@ -25,6 +27,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
     {
         public static new UIGameplayPanelsController Singleton{ get; protected set; }
 
+
         public override void Awake()
         {
             if (Singleton == null)
@@ -38,6 +41,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
             base.Init();
             ShowPanel(GameplayPanels.Gameplay);
         }
+
 
         #region Panels
 
@@ -77,5 +81,12 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         }
 
         #endregion
+
+
+        StarterAssetsInputs m_StarterAssetsInputs;
+        public void SetPlayerInput(StarterAssetsInputs starterAssetsInputs)
+        {
+            m_StarterAssetsInputs = starterAssetsInputs;
+        }
     }
 }

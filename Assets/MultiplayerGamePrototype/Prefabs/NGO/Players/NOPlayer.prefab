@@ -236,6 +236,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5393215578589016642, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 5420857361349278248, guid: c5efc39a8aaf6e64ea40e9ad573e9b47, type: 3}
       propertyPath: cursorLocked
       value: 0
@@ -401,7 +405,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ad752b68458048dca8f030d12cf790e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BombPrefab: {fileID: 3114454183818361463, guid: 865aaa199b4b84b71acb7cec6461415e, type: 3}
   m_BombDeployPosition: {fileID: 6703024603234526745}
   m_StarterAssetsInputs: {fileID: 3116342469246686676}
 --- !u!114 &1698182352821242287 stripped

@@ -27,8 +27,6 @@ namespace MultiplayerGamePrototype.Gameplay.NOSpawnControllers
         public void SpawnPlayerObject(ulong joinedClientId)
         {
             Debug.Log($"PlayerSpawnController-SpawnPlayerObject-joinedClientId:{joinedClientId}");
-            //List<Vector3> positions = GameManager.Singleton.GetAvailablePosition(m_PlayerPrefab.localScale, areaSize, 1);
-            //Vector3 position = positions.Count == 0 ? DEFAULT_POSITION : positions[0];
             Transform newGameObject;
             if (joinedClientId == NetworkManager.ServerClientId)
                 newGameObject = Instantiate(m_PlayerPrefab, GetAvaiablePosition(), Quaternion.identity);

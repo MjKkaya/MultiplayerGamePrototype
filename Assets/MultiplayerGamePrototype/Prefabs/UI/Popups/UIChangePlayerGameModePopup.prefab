@@ -2876,13 +2876,14 @@ GameObject:
   - component: {fileID: 2196070201794840615}
   - component: {fileID: 6237845862701510820}
   - component: {fileID: 7745318148743376772}
+  - component: {fileID: 8193401899935516782}
   m_Layer: 5
   m_Name: UIChangePlayerGameModePopup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6236529189314720283
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2958,3 +2959,15 @@ MonoBehaviour:
   m_BulletSizeDropdown: {fileID: 3614151579003327377}
   m_CloseButton: {fileID: 7581404523772031498}
   m_ChangeButton: {fileID: 8531825318503468138}
+--- !u!225 &8193401899935516782
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8932372483808567260}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0

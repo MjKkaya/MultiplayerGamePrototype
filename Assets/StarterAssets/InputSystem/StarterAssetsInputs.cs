@@ -63,6 +63,11 @@ namespace StarterAssets
 			//cursorLocked = !cursorLocked;
 			//cursorInputForLook = !cursorInputForLook;
    //     }
+
+		public void OnTooglePause(InputValue value)
+		{
+			Debug.Log($"OnTooglePause-value:{value}");
+		}
 #endif
 
 

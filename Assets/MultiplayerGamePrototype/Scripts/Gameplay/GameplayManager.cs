@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.UIElements;
+using StarterAssets;
+using UnityEngine.InputSystem;
 
 
 namespace MultiplayerGamePrototype.Gameplay
@@ -26,12 +28,6 @@ namespace MultiplayerGamePrototype.Gameplay
             }
         }
 
-        [SerializeField] private NOPlayerFPSController m_FPSController;
-        public NOPlayerFPSController FPSController{
-            get{
-                return m_FPSController;
-            }
-        }
 
         [SerializeField] private SinglePooledDynamicSpawner m_StunBombSinglePool;
         public SinglePooledDynamicSpawner StunBombSinglePool{
@@ -40,11 +36,15 @@ namespace MultiplayerGamePrototype.Gameplay
             }
         }
 
-        [SerializeField] private SOGameData m_SOGameData;
-        [SerializeField] private UIGameplayPanelsController m_UIGameplayPanelsController;
-
         public PlayerSpawnController PlayerSpawnController;
         public TargetObjectsSpawnController TargetObjectsSpawnController;
+
+        [SerializeField] private SOGameData m_SOGameData;
+        [SerializeField] private UIGameplayPanelsController m_UIGameplayPanelsController;
+        [SerializeField] private NOPlayerFPSController m_FPSController;
+
+        private PlayerInput m_PlayerInput;
+        private StarterAssetsInputAction m_StarterAssetsInputAction;
 
 
         public override void Awake()
@@ -77,6 +77,7 @@ namespace MultiplayerGamePrototype.Gameplay
 
         public void PlayerImmobilized()
         {
+
             ActionOnImmobilizedPlayer?.Invoke();
         }
        
@@ -98,6 +99,64 @@ namespace MultiplayerGamePrototype.Gameplay
                 PlayerSpawnController.SpawnPlayerObject(clientId);
             }
         }
+
+
+        #region Input Controls
+
+        public void SetInputs(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
+        {
+            m_StarterAssetsInputAction = new();
+            m_StarterAssetsInputAction.Player.TooglePause.performed += OnTooglePausePlayer;
+            m_StarterAssetsInputAction.UIMenu.TooglePause.performed += OnTooglePauseUIMenu;
+            m_StarterAssetsInputAction.Player.Enable();
+
+            m_PlayerInput = playerInput;
+            m_PlayerInput.SwitchCurrentActionMap("Player");
+            m_FPSController.SetPlayer(followingObject, playerInput, starterAssetsInputs);
+        }
+
+        private void OnTooglePausePlayer(InputAction.CallbackContext callbackContext)
+        {
+            Debug.Log("GameplayManager-OnTooglePausePlayer");
+            if(m_PlayerInput.enabled)
+                m_PlayerInput.SwitchCurrentActionMap("UIMenu");
+            m_StarterAssetsInputAction.Player.Disable();
+            m_StarterAssetsInputAction.UIMenu.Enable();
+        }
+
+        private void OnTooglePauseUIMenu(InputAction.CallbackContext callbackContext)
+        {
+            Debug.Log("GameplayManager-OnTooglePauseUIMenu");
+            if(m_PlayerInput.enabled)
+                m_PlayerInput.SwitchCurrentActionMap("Player");
+            m_StarterAssetsInputAction.UIMenu.Disable();
+            m_StarterAssetsInputAction.Player.Enable();
+        }
+
+        //private Coroutine m_ImmobilizedCoroutine;
+
+        //private void ImmobilizedPlayer()
+        //{
+        //    if (m_ImmobilizedCoroutine != null)
+        //        StopCoroutine(m_ImmobilizedCoroutine);
+        //    m_ImmobilizedCoroutine = StartCoroutine(ImmobilizedCoroutine());
+        //}
+
+        //IEnumerator ImmobilizedCoroutine()
+        //{
+        //    m_PlayerInput
+
+        //    bool inputPlayerLastState = m_StarterAssetsInputAction.Player.enabled;
+        //    bool inputUIMenuLastState = m_StarterAssetsInputAction.Player.enabled;
+        //    m_StarterAssetsInputAction.Player.Disable();
+        //    m_StarterAssetsInputAction.UIMenu.Disable();
+        //    yield return new WaitForSeconds(m_SOGameData.PlyaerImmobilizedTime);
+        //    m_StarterAssetsInputAction.Player.Disable();
+        //    m_StarterAssetsInputAction.UIMenu.Disable();
+        //}
+
+        #endregion
+
 
         #region Available Positions
 
@@ -166,6 +225,7 @@ namespace MultiplayerGamePrototype.Gameplay
         {
             Debug.Log("GameManager-OnDestroy");
             LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
+            m_StarterAssetsInputAction.Dispose();
         }
 
         #endregion

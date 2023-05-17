@@ -8,7 +8,6 @@ namespace MultiplayerGamePrototype.ScriptableObjects
     {
         [SerializeField]
         [Tooltip("When the bomb is fired, surrounding players remain immobilized for the duration.\nValue type is seconds")]
-        [Range(0, 30)]
         private float m_PlyaerImmobilizedTime;
         public float PlyaerImmobilizedTime{
             get{
