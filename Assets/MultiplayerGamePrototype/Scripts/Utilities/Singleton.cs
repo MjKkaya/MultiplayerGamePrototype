@@ -41,6 +41,7 @@ namespace MultiplayerGamePrototype.Utilities
             }
             else
             {
+                Debug.Log($"{name}-Awake-Destroy it!!!");
                 Destroy(gameObject);
             }
         }

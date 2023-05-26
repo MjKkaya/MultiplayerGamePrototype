@@ -12,6 +12,7 @@ using Unity.Netcode;
 using UnityEngine.UIElements;
 using StarterAssets;
 using UnityEngine.InputSystem;
+using MultiplayerGamePrototype.UGS.Managers;
 
 
 namespace MultiplayerGamePrototype.Gameplay
@@ -58,16 +59,7 @@ namespace MultiplayerGamePrototype.Gameplay
         public void Init()
         {
             Debug.Log("GameplayManager-Init");
-            //NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
             LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
-
-            //Host must to create player object  for all players manually.
-            //if (NetworkManager.Singleton.IsServer)
-            //    SpawnPlayerObjectForAllConnectedPlayers();
-
-                
-            //... donT use here.
-            //    Set clients when trigger "LoadComplete" or "LoadEventCompleted" or 
         }
 
         public void HostPlayerSpawned()
@@ -88,6 +80,14 @@ namespace MultiplayerGamePrototype.Gameplay
                 int randomCount = UnityEngine.Random.Range(m_SOGameData.MinimumNumberSpawnTargetObject, m_SOGameData.MinimumNumberSpawnTargetObject * 2);
                 TargetObjectsSpawnController.SpawnTargetObjects(randomCount);
             }
+        }
+
+        // Shutdown the network session and load the menu scene
+        public void LeaveTheGame()
+        {
+            Debug.Log("GameplayManager-LeaveTheGame");
+            UGSLobbyManager.Singleton.RemovePlayerAsync(UGSAuthManager.MyPlayerId);
+            UGSNetworkManager.Singleton.Shutdown();
         }
 
 
@@ -132,28 +132,6 @@ namespace MultiplayerGamePrototype.Gameplay
             m_StarterAssetsInputAction.UIMenu.Disable();
             m_StarterAssetsInputAction.Player.Enable();
         }
-
-        //private Coroutine m_ImmobilizedCoroutine;
-
-        //private void ImmobilizedPlayer()
-        //{
-        //    if (m_ImmobilizedCoroutine != null)
-        //        StopCoroutine(m_ImmobilizedCoroutine);
-        //    m_ImmobilizedCoroutine = StartCoroutine(ImmobilizedCoroutine());
-        //}
-
-        //IEnumerator ImmobilizedCoroutine()
-        //{
-        //    m_PlayerInput
-
-        //    bool inputPlayerLastState = m_StarterAssetsInputAction.Player.enabled;
-        //    bool inputUIMenuLastState = m_StarterAssetsInputAction.Player.enabled;
-        //    m_StarterAssetsInputAction.Player.Disable();
-        //    m_StarterAssetsInputAction.UIMenu.Disable();
-        //    yield return new WaitForSeconds(m_SOGameData.PlyaerImmobilizedTime);
-        //    m_StarterAssetsInputAction.Player.Disable();
-        //    m_StarterAssetsInputAction.UIMenu.Disable();
-        //}
 
         #endregion
 
@@ -209,17 +187,16 @@ namespace MultiplayerGamePrototype.Gameplay
 
         #region Events
 
-        //private void OnClientConnectedCallback(ulong connectedClientId)
-        //{
-        //    if(NetworkManager.Singleton.IsServer)
-        //        PlayerSpawnController.SpawnPlayerObject(connectedClientId);
-        //}
-
         private void OnLoadClientGameplaySceneComplete(ulong clientId)
         {
             PlayerSpawnController.SpawnPlayerObject(clientId);
         }
 
+        private void OnApplicationQuit()
+        {
+            Debug.Log("GameManager-OnApplicationQuit");
+            LeaveTheGame();
+        }
 
         private void OnDestroy()
         {

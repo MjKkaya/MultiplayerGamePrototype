@@ -1,3 +1,4 @@
+using MultiplayerGamePrototype.Gameplay;
 using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.UI.Core;
@@ -42,8 +43,8 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         {
             SetGameMode();
             SetMyBulletMode();
-            m_ChangeGameBulletModeButton.gameObject.SetActive(UGSLobbyManager.AmIhost);
-            m_LobbyInfoText.text = $"Id: {UGSLobbyManager.CurrentLobby.Id} \n Code:{UGSLobbyManager.CurrentLobby.LobbyCode}";
+            m_ChangeGameBulletModeButton.gameObject.SetActive(UGSLobbyManager.Singleton.AmIhost);
+            m_LobbyInfoText.text = $"Host: {UGSLobbyManager.CurrentLobby.HostId} \n Code:{UGSLobbyManager.CurrentLobby.LobbyCode}";
             base.Show();
         }
 
@@ -64,15 +65,6 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
             m_ChangeGameBulletModeButton.interactable = false;
             await UGSLobbyManager.Singleton.UpdateLobbyDataAsync(UGSLobbyDataController.CreateRandomLobbyBulletMode());
             m_ChangeGameBulletModeButton.interactable = true;
-        }
-
-        // Shutdown the network session and load the menu scene
-        private void Shutdown()
-        {
-            //if (UGSNetworkManager.Singleton.IsServer)
-            //    await UGSLobbyManager.Singleton.DeleteCurrentLobbyAsync();
-            UGSNetworkManager.Singleton.Shutdown();
-            UGSLobbyManager.Singleton.RemovePlayerAsync(UGSAuthManager.MyPlayerId);
         }
 
 
@@ -119,7 +111,8 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
 
         private void OnButtonClickedLeave()
         {
-            Shutdown();
+            m_LeaveButton.interactable = false;
+            GameplayManager.Singleton.LeaveTheGame();
         }
 
         #endregion

@@ -105,7 +105,7 @@ namespace MultiplayerGamePrototype.UGS.Utilities
             if (m_PrefabInstance != null)
             {
                 // Always deregister the prefab
-                if(PrefabToSpawn != null)
+                if(PrefabToSpawn != null && NetworkManager != null && NetworkManager.PrefabHandler != null)
                     NetworkManager.PrefabHandler.RemoveHandler(PrefabToSpawn);
                 Destroy(m_PrefabInstance);
             }

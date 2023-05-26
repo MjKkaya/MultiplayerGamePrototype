@@ -5,13 +5,13 @@ using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using System.Threading.Tasks;
 
 
 namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSRelayManager : SingletonMonoPersistent<UGSRelayManager>
     {
-        //public static event Action ActionOnJoinedRelayServer;
         public static event Action ActionOnFailedToJoinRelayServer;
 
 
@@ -30,10 +30,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
             base.Awake();
             UGSLobbyManager.ActionOnCreatedLobby += OnCreatedLobby;
             UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
+            UGSLobbyManager.ActionOnChangedRelayJoinCode += OnChangedRelayJoinCode;
         }
 
 
-        private async void AllocateRelayServerAndGetJoinCode(int maxConnections)
+        public async Task<bool> AllocateRelayServerAndGetJoinCode(int maxConnections)
         {
             Debug.Log($"UGSRelayManager-AllocateRelayServerAndGetJoinCode:maxConnections{maxConnections}");
 
@@ -47,18 +48,20 @@ namespace MultiplayerGamePrototype.UGS.Managers
                     m_JoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
                     Debug.Log($"UGSRelayManager-AllocateRelayServerAndGetJoinCode-joinCode:{m_JoinCode}");
                     UGSNetworkManager.Singleton.StartHost(relayServerData);
-                    //ActionOnJoinedRelayServer?.Invoke();
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Debug.Log($"UGSRelayManager-AllocateRelayServerAndGetJoinCode-GetJoinCode-ex:{ex}");
                     ActionOnFailedToJoinRelayServer?.Invoke();
+                    return false;
                 }
             }
             catch (Exception ex)
             {
                 Debug.Log($"UGSRelayManager-AllocateRelayServerAndGetJoinCode-CreateAllocation-ex:{ex}");
                 ActionOnFailedToJoinRelayServer?.Invoke();
+                return false;
             }
         }
 
@@ -71,7 +74,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 RelayServerData relayServerData = new(joinAllocation, "dtls");
                 UGSNetworkManager.Singleton.StartClient(relayServerData);
                 m_JoinCode = joinCode;
-                //ActionOnJoinedRelayServer?.Invoke();
             }
             catch (Exception ex)
             {
@@ -82,27 +84,30 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         #region Events
 
-        private void OnCreatedLobby(int maxPlayers)
+        private async void OnCreatedLobby(int maxPlayers)
         {
-            AllocateRelayServerAndGetJoinCode(maxPlayers);
+            await AllocateRelayServerAndGetJoinCode(maxPlayers);
         }
 
         private void OnJoinedLobby()
         {
-            if (!UGSLobbyManager.AmIhost)
-                JoinAllocationAsync(UGSLobbyDataController.GetRelayJoinCode());
+            if (!UGSLobbyManager.Singleton.AmIhost)
+                JoinAllocationAsync(UGSLobbyDataController.GetLobbyData(UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE));
         }
 
-        //private void OnClientDisconnectCallback(ulong connectedClientId)
-        //{
-        //    Debug.Log($"UGSRelayManager-OnClientDisconnectCallback-NetworkManager.Singleton.LocalClientId:{NetworkManager.Singleton.LocalClientId}, connectedClientId:{connectedClientId}, DisconnectReason:{NetworkManager.Singleton.DisconnectReason}");
-        //    //todo:Change the host of the lobby and create new relay connection.
-        //}
+        private void OnChangedRelayJoinCode()
+        {
+            Debug.Log($"UGSRelayManager-OnChangedRelayJoinCode-IsListening:{UGSNetworkManager.Singleton.IsListening}");
+            if (!UGSNetworkManager.Singleton.IsListening)
+            {
+                string relayJoinCode = UGSLobbyDataController.GetLobbyData(UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE);
+                Debug.Log($"UGSRelayManager-OnChangedRelayJoinCode-relayJoinCode :{relayJoinCode}");
+                JoinAllocationAsync(relayJoinCode);
+            }
+        }
 
         private void OnDestroy()
         {
-            //if(NetworkManager.Singleton != null)
-            //    NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectCallback;
             UGSLobbyManager.ActionOnCreatedLobby -= OnCreatedLobby;
             UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
         }

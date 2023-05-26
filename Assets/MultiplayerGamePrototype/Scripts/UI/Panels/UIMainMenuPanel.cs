@@ -17,9 +17,10 @@ namespace MultiplayerGamePrototype.UI.Panels
         [SerializeField] TMP_InputField m_LobbyCodeInput;
 
 
-        private void OnEnable()
+        private void Start()
         {
             Init();
+            Debug.Log($"UIMainMenuPanel-Start-IsListening:{UGSNetworkManager.Singleton.IsListening}");
         }
 
         public override void Init()
@@ -105,10 +106,12 @@ namespace MultiplayerGamePrototype.UI.Panels
         {
             UGSAuthManager.ActionOnCompletedSignIn -= OnCompletedSignIn;
             UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
-        if (m_JoinGameButton != null)
+            if (m_JoinGameButton != null)
                 m_JoinGameButton.onClick.RemoveAllListeners();
             if (m_CreateGameButton != null)
                 m_CreateGameButton.onClick.RemoveAllListeners();
+            if(m_QuickJoinButton != null)
+                m_QuickJoinButton.onClick.RemoveAllListeners();
         }
 
         #region Button Events

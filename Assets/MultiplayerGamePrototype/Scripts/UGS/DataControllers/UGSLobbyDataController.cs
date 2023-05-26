@@ -26,6 +26,14 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         Max = 3
     }
 
+    public enum GameStateTypes
+    {
+        Preparation = 0,
+        Started = 1,
+        Paused = 2,
+        Finished = 3
+    }
+
 
     public static class UGSLobbyDataController
     {
@@ -34,6 +42,7 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
         public static readonly string LOBBY_DATA_BULLET_COLOR = "LD_BC";
         public static readonly string LOBBY_DATA_BULLET_SIZE = "LD_BS";
         public static readonly string LOBBY_DATA_RELAY_JOIN_CODE = "LD_RJC";
+        public static readonly string LOBBY_DATA_GAME_STATE = "LD_GS";
 
         #endregion
 
@@ -71,32 +80,80 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
             return playerBulletColor == lobbyBulletColor && playerBulletSize == lobbyBulletSize;
         }
 
-        #region Relay Join Code
 
-        public static UpdateLobbyOptions CreateRelayJoinCodeData(string relayJoinCode)
+        #region Initial Data
+
+        public static UpdateLobbyOptions CreateInitialData(string relayJoinCode)
         {
-            Debug.Log($"UGSLobbyDataController-CreateRelayJoinCodeData-relayJoinCode:{relayJoinCode}");
+            Debug.Log($"UGSLobbyDataController-CreateInitialData-relayJoinCode:{relayJoinCode}");
 
             UpdateLobbyOptions lobbyOptions = new()
             {
-                Data = new Dictionary<string, DataObject>() { { LOBBY_DATA_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) } }
+                Data = new Dictionary<string, DataObject>()
+                {
+                    { LOBBY_DATA_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
+                    { LOBBY_DATA_GAME_STATE, new DataObject(DataObject.VisibilityOptions.Public, ((int)GameStateTypes.Preparation).ToString(), DataObject.IndexOptions.N1) }
+                }
             };
 
             return lobbyOptions;
         }
 
-        public static string GetRelayJoinCode()
+        public static UpdateLobbyOptions UpdateGameState(GameStateTypes gameStateType)
         {
-            string joinCode = null;
+            Debug.Log($"UGSLobbyDataController-UpdateGameState-gameStateType:{gameStateType}");
+
+            UpdateLobbyOptions lobbyOptions = new()
+            {
+                Data = new Dictionary<string, DataObject>()
+                {
+                    { LOBBY_DATA_GAME_STATE, new DataObject(DataObject.VisibilityOptions.Public, ((int)gameStateType).ToString(), DataObject.IndexOptions.N1) }
+                }
+            };
+
+            return lobbyOptions;
+        }
+
+        //public static string GetRelayJoinCode()
+        //{
+        //    string joinCode = null;
+        //    Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+
+        //    if (currentLobby != null)
+        //    {
+        //        currentLobby.Data.TryGetValue(LOBBY_DATA_RELAY_JOIN_CODE, out DataObject dataObject);
+        //        joinCode = dataObject.Value;
+        //    }
+
+        //    return joinCode;
+        //}
+
+        public static string GetLobbyData(string key)
+        {
+            string stringData = null;
             Lobby currentLobby = UGSLobbyManager.CurrentLobby;
 
             if (currentLobby != null)
             {
-                currentLobby.Data.TryGetValue(LOBBY_DATA_RELAY_JOIN_CODE, out DataObject dataObject);
-                joinCode = dataObject.Value;
+                currentLobby.Data.TryGetValue(key, out DataObject dataObject);
+                stringData = dataObject.Value;
             }
 
-            return joinCode;
+            return stringData;
+        }
+
+        public static int GetLobbyData(string key, int defaultValue = 0)
+        {
+            int intData = defaultValue;
+            Lobby currentLobby = UGSLobbyManager.CurrentLobby;
+
+            if (currentLobby != null)
+            {
+                currentLobby.Data.TryGetValue(key, out DataObject dataObject);
+                int.TryParse(dataObject.Value, out intData);
+            }
+
+            return intData;
         }
 
         #endregion

@@ -6,7 +6,6 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.DebugUI;
 
 
 namespace MultiplayerGamePrototype.Core
@@ -37,6 +36,17 @@ namespace MultiplayerGamePrototype.Core
             UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
         }
 
+        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
+        {
+            Debug.Log($"LoadingSceneManager-LoadScene-m_sceneActive:{m_sceneActive}, sceneToLoad:{sceneToLoad}, isNetworkSessionActive:{isNetworkSessionActive}");
+            StartCoroutine(Loading(sceneToLoad, isNetworkSessionActive));
+        }
+
+        public bool IsCurrentSceneSame(SceneName sceneName)
+        {
+            return m_sceneActive == sceneName;
+        }
+
         //We cannot subscribe in the "awake" method as we have to wait for NetworkManager.Singleton to assign it.
         private void SubscribeSceneManager()
         {
@@ -57,15 +67,6 @@ namespace MultiplayerGamePrototype.Core
                 //NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
                 NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneEvent;
             }
-        }
-
-        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
-        {
-            Debug.Log($"LoadingSceneManager-LoadScene-m_sceneActive:{m_sceneActive}, sceneToLoad:{sceneToLoad}, isNetworkSessionActive:{isNetworkSessionActive}");
-            //if (NetworkManager.Singleton.IsServer && sceneToLoad == SceneName.Lobby && m_sceneActive < SceneName.Lobby)
-            //    StartCoroutine(SubscribeSceneManager());
-
-            StartCoroutine(Loading(sceneToLoad, isNetworkSessionActive));
         }
 
         // Coroutine for the loading effect. It use an alpha in out effect

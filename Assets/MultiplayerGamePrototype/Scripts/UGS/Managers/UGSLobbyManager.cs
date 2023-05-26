@@ -22,6 +22,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
         public static event Action ActionOnChangedMyPlayerData;
         public static event Action ActionOnChangedGameBulletModeData;
         public static event Action<string, string> ActionOnChangedPlayersStatData;
+        public static event Action ActionOnChangedHost;
+        public static event Action ActionOnChangedRelayJoinCode;
 
 
         private static Lobby m_CurrentLobby;
@@ -33,7 +35,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public static Player MyLobbyPlayer
+        public Player MyLobbyPlayer
         {
             get
             {
@@ -53,7 +55,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public static bool AmIhost{
+        public bool AmIhost{
             get{
                 if (m_CurrentLobby != null && m_CurrentLobby.HostId == UGSAuthManager.MyPlayerId)
                     return true;
@@ -68,10 +70,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         public override void Awake()
         {
+            Debug.Log("UGSLobbyManager-Awake");
             base.Awake();
             m_LobbyEventCallbacks = new LobbyEventCallbacks();
             UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
-            UGSNetworkManager.ActionOnClientStopped += OnClientStopped;
+            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
         }
 
 
@@ -120,10 +123,44 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        //private async void UpdatePlayerScore()
-        //{
+        private void UnsubscribeLobby()
+        {
+            try
+            {
+                m_LobbyEventCallbacks = new LobbyEventCallbacks();
+                Debug.Log($"UGSLobbyManager-UnsubscribedLobby-m_HeartbeatLobbyCoroutine:{m_HeartbeatLobbyCoroutine}");
+                if (gameObject != null && m_HeartbeatLobbyCoroutine != null)
+                {
+                    Debug.Log("UGSLobbyManager-UnsubscribedLobby-StopCoroutine");
+                    StopCoroutine(m_HeartbeatLobbyCoroutine);
+                }
+                m_CurrentLobby = null;
+                    
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-UnsubscribedLobby-ex{ex}");
+            }
+        }
 
-        //}
+        private void DebugPlayers()
+        {
+            Debug.Log("UGSLobbyManager-DebugPlayers");
+            List<Player> players = m_CurrentLobby.Players;
+            int playersCount = players.Count;
+            Player player;
+            for (int i = 0; i < playersCount; i++)
+            {
+                player = players[i];
+                if(player == null)
+                {
+                    Debug.Log($"UGSLobbyManager-DebugPlayers- {i}.player is null!!!");
+                    continue;
+                }
+
+                Debug.Log($"UGSLobbyManager-DebugPlayers-{i}.player=>\n:{player.ToStringFull()}");
+            }
+        }
 
         #region LobbyService Methods
 
@@ -165,7 +202,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-
         public async Task<bool> QuickJoinLobbyAsync()
         {
             try
@@ -190,7 +226,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 return false;
             }
         }
-
 
         /*public async Task<bool> QuickJoinLobbyAsync(string username)
         {
@@ -260,6 +295,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 return false;
             }
         }
+        private async void UpdateGameStateData(GameStateTypes gameStateType)
+        {
+            await UpdateLobbyDataAsync(UGSLobbyDataController.UpdateGameState(gameStateType));
+        }
+
 
         public async Task<bool> UpdateMyPlayerDataAsync(UpdatePlayerOptions playerOptions)
         {
@@ -305,6 +345,67 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
+        public async Task<bool> MigrateHostRandomly()
+        {
+            Debug.Log($"UGSLobbyManager-MigrateHostRandomly");
+            try
+            {
+                string currentHostId = m_CurrentLobby.HostId;
+                string newHostId = null;
+
+                List<Player> players = m_CurrentLobby.Players;
+                int playerCount = players.Count;
+                Player player;
+                for (int i = 0; i < playerCount; i++)
+                {
+                    player = players[i];
+                    if (player != null && currentHostId != player.Id)
+                    {
+                        newHostId = player.Id;
+                        break;
+                    }
+                }
+
+                Debug.Log($"UGSLobbyManager-MigrateHostRandomly-Current/New => {currentHostId}/{newHostId}");
+                if (string.IsNullOrEmpty(newHostId))
+                    return false;
+
+                UpdateLobbyOptions lobbyOptions = new()
+                {
+                    HostId = newHostId
+                };
+
+                await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
+                //StopHeartBeat();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-MigrateHostRandomly-ex:{ex}");
+                return false;
+            }
+        }
+
+        public async Task<bool> MigrateLobbyHost(string newHostId)
+        {
+            Debug.Log($"UGSLobbyManager-MigrateLobbyHost:{m_CurrentLobby.HostId} => {newHostId}");
+            try
+            {
+                UpdateLobbyOptions lobbyOptions = new()
+                {
+                    HostId = newHostId
+                };
+
+                m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"UGSLobbyManager-MigrateLobbyHost-ex:{ex}");
+                return false;
+            }
+        }
+
         #endregion
 
 
@@ -314,12 +415,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-lobbyId:{lobbyId}");
             var delay = new WaitForSecondsRealtime(waitTimeSeconds);
-            while (true)
+            do
             {
                 Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-Continue-lobbyId:{lobbyId}");
                 LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
                 yield return delay;
-            }
+            } while (m_CurrentLobby != null);
         }
 
         #endregion
@@ -333,39 +434,39 @@ namespace MultiplayerGamePrototype.UGS.Managers
         /// <param name="relayJoinCode"></param>
         private async void OnStartedServer()
         {
-            if(AmIhost)
-                await UpdateLobbyDataAsync(UGSLobbyDataController.CreateRelayJoinCodeData(UGSRelayManager.Singleton.JoinCode));
+            Debug.Log("UGSLobbyManager-OnStartedServer");
+            await UpdateLobbyDataAsync(UGSLobbyDataController.CreateInitialData(UGSRelayManager.Singleton.JoinCode));
         }
 
-        private void OnClientStopped()
+
+        private async void OnLoadClientGameplaySceneComplete(ulong clientId)
         {
-            m_LobbyEventCallbacks = new LobbyEventCallbacks();
-            Debug.Log($"UGSLobbyManager-OnClientStopped-m_HeartbeatLobbyCoroutine:{m_HeartbeatLobbyCoroutine}");
-            if (gameObject != null && m_HeartbeatLobbyCoroutine != null)
-                StopCoroutine(m_HeartbeatLobbyCoroutine);
-            m_CurrentLobby = null;
+            Debug.Log($"UGSLobbyManager-OnLoadClientGameplaySceneComplete-clientId/ServerClientId:{clientId}/{UGSNetworkManager.ServerClientId}");
+            if(clientId == UGSNetworkManager.ServerClientId)
+                await UpdateLobbyDataAsync(UGSLobbyDataController.UpdateGameState(GameStateTypes.Started));
         }
+
 
         private void OnApplicationQuit()
         {
-            if (m_CurrentLobby == null)
-                return;
-
-            try
+            if (m_CurrentLobby != null && LoadingSceneManager.Singleton.IsCurrentSceneSame(SceneName.Lobby))
             {
-                Debug.Log("UGSLobbyManager-OnApplicationQuit");
-                RemovePlayerAsync(UGSAuthManager.MyPlayerId);
-            }
-            catch (System.Exception ex)
-            {
-                Debug.Log($"UGSLobbyManager-OnApplicationQuit-ex:{ex}");
+                try
+                {
+                    Debug.Log("UGSLobbyManager-OnApplicationQuit");
+                    RemovePlayerAsync(UGSAuthManager.MyPlayerId);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Log($"UGSLobbyManager-OnApplicationQuit-ex:{ex}");
+                }
             }
         }
 
         private void OnDestroy()
         {
             UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
-            UGSNetworkManager.ActionOnClientStopped -= OnClientStopped;
+            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
         }
 
         #region Lobby Events
@@ -379,7 +480,22 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
             Debug.Log($"UGSLobbyManager-OnLobbyChanged-before-Players.Count:{m_CurrentLobby.Players.Count}");
             if (!lobbyChanges.LobbyDeleted)
+            {
+                string currentHostId = m_CurrentLobby.HostId;
                 lobbyChanges.ApplyToLobby(m_CurrentLobby);
+
+                if (lobbyChanges.HostId.Changed)
+                {
+                    Debug.Log($"UGSLobbyManager-OnLobbyChanged-HostId Changed:{currentHostId}=>{lobbyChanges.HostId.Value}");
+                    if(AmIhost)
+                    {
+                        UpdateGameStateData(GameStateTypes.Paused);
+                        m_HeartbeatLobbyCoroutine = StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
+                    }
+
+                    ActionOnChangedHost?.Invoke();
+                }
+            }
             Debug.Log($"UGSLobbyManager-OnLobbyChanged-after-Players.Count:{m_CurrentLobby.Players.Count}");
         }
 
@@ -391,13 +507,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
             foreach (LobbyPlayerJoined item in joinedPlayers)
             {
                 newPlayersId.Add(item.Player.Id);
-                Debug.Log($"UGSLobbyManager-OnPlayerJoined-Index:{item.PlayerIndex}, PlayerId:{item.Player.Id}");
+                Debug.Log($"UGSLobbyManager-OnPlayerJoined-Index:{item.PlayerIndex}, Player=>\n{item.Player.ToStringFull()}");
             }
 
             if (AmIhost)
                 AddNewPlayerStatsToLobbyData(newPlayersId);
-
-            Debug.Log($"UGSLobbyManager-OnPlayerJoined-Players.Count:{m_CurrentLobby.Players.Count}");
+            DebugPlayers();
             ActionOnPlayerJoined?.Invoke(newPlayersId);
         }
 
@@ -423,6 +538,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 else if (key == UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE)
                 {
                     Debug.Log($"UGSLobbyManager-OnDataChanged-LOBBY_DATA_RELAY_JOIN_CODE");
+                    ActionOnChangedRelayJoinCode?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_GAME_STATE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataChanged-LOBBY_DATA_GAME_STATE");
                 }
                 else
                 {
@@ -439,9 +559,10 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        private void OnPlayerLeft(List<int> leftPlayerIds)
+        private void OnPlayerLeft(List<int> leftId)
         {
-            Debug.Log($"UGSLobbyManager-OnPlayerLeft-Count:{leftPlayerIds.Count}");
+            Debug.Log($"UGSLobbyManager-OnPlayerLeft-leftId=>{leftId.ToStringFull()}");
+            DebugPlayers();
         }
 
         private void OnLobbyDeleted()
@@ -458,7 +579,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log($"UGSLobbyManager-OnLobbyEventConnectionStateChanged:{connectionState}, m_CurrentLobby:{m_CurrentLobby}");
             if(connectionState == LobbyEventConnectionState.Unsubscribed)
-                OnClientStopped();
+                UnsubscribeLobby();
         }
 
         #endregion
