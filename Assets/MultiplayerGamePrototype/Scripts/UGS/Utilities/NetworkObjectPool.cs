@@ -48,8 +48,20 @@ namespace MultiplayerGamePrototype.UGS.Utilities
     /// Boss Room uses this for projectiles. In theory it should use this for imps too, but we wanted to show vanilla spawning vs pooled spawning.
     /// Hooks to NetworkManager's prefab handler to intercept object spawning and do custom actions.
     /// </summary>
-    public class NetworkObjectPool : SingletonNetwork<NetworkObjectPool>
+    //public class NetworkObjectPool : SingletonNetwork<NetworkObjectPool>
+    public class NetworkObjectPool : NetworkBehaviour
     {
+        public static NetworkObjectPool Singleton { get; private set; }
+
+        public void Awake()
+        {
+            if (Singleton == null)
+                Singleton = this;
+            else
+                Destroy(gameObject);
+        }
+
+
         [SerializeField]
         List<PoolConfigObject> PooledPrefabsList;
 

@@ -1,11 +1,10 @@
 using MultiplayerGamePrototype.Core;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
 
-public class EditorSceneController : MonoBehaviour
+public class EditorSceneController
 {
     private static string m_lastOpenedScene;
 

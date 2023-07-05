@@ -28,7 +28,7 @@ namespace MultiplayerGamePrototype.Utilities
         }
     }
 
-    public class SingletonMonoPersistent<T> : MonoBehaviour where T : Component
+    public class SingletonMonoPersistent<T> : MonoBehaviour where T : Component //done
     {
         public static T Singleton { get; private set; }
 
@@ -47,38 +47,37 @@ namespace MultiplayerGamePrototype.Utilities
         }
     }
 
-    public class SingletonNetwork<T> : NetworkBehaviour where T : Component
-    {
-        public static T Singleton { get; private set; }
+    //public class SingletonNetwork<T> : NetworkBehaviour where T : MonoBehaviour
+    //{
+    //    public static T Singleton { get; private set; }
+    //    public virtual void Awake()
+    //    {
+    //        if (Singleton == null)
+    //        {
+    //            Singleton = this as T;
+    //        }
+    //        else
+    //        {
+    //            Destroy(gameObject);
+    //        }
+    //    }
+    //}
 
-        public virtual void Awake()
-        {
-            if (Singleton == null)
-            {
-                Singleton = this as T;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
-    }
+    //public class SingletonNetworkPersistent<T> : NetworkBehaviour where T : Component
+    //{
+    //    public static T Singleton { get; private set; }
 
-    public class SingletonNetworkPersistent<T> : NetworkBehaviour where T : Component
-    {
-        public static T Singleton { get; private set; }
-
-        public virtual void Awake()
-        {
-            if (Singleton == null)
-            {
-                Singleton = this as T;
-                DontDestroyOnLoad(this);
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
-    }
+    //    public virtual void Awake()
+    //    {
+    //        if (Singleton == null)
+    //        {
+    //            Singleton = this as T;
+    //            DontDestroyOnLoad(this);
+    //        }
+    //        else
+    //        {
+    //            Destroy(gameObject);
+    //        }
+    //    }
+    //}
 }

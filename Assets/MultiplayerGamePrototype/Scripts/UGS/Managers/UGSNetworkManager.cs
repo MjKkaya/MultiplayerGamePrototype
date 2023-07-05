@@ -1,7 +1,6 @@
 using MultiplayerGamePrototype.Core;
 using MultiplayerGamePrototype.Utilities;
 using System;
-using System.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
