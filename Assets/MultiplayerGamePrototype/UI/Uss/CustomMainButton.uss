@@ -1,0 +1,18 @@
+.custom-main-button {
+    width: 750px;
+    height: 125px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    -unity-font-style: bold;
+    font-size: 62px;
+    margin-top: 20px;
+    background-color: rgb(75, 101, 152);
+    color: rgb(255, 255, 255);
+    overflow: hidden;
+}

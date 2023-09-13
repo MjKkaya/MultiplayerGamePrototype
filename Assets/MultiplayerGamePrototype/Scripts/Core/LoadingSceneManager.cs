@@ -1,5 +1,5 @@
 using MultiplayerGamePrototype.UGS.Managers;
-using MultiplayerGamePrototype.UI.Utilities;
+using MultiplayerGamePrototype.UIToolkit.Utilities;
 using MultiplayerGamePrototype.Utilities;
 using System;
 using System.Collections;
@@ -72,9 +72,11 @@ namespace MultiplayerGamePrototype.Core
         // Coroutine for the loading effect. It use an alpha in out effect
         private IEnumerator Loading(SceneName sceneToLoad, bool isNetworkSessionActive)
         {
+            Debug.Log($"LoadingSceneManager-Loading-CAN_LOAD:{m_LoadingFadeEffect.CAN_LOAD}");
             m_LoadingFadeEffect.FadeIn();
             // Here the player still sees the black screen
-            yield return new WaitUntil(() => LoadingFadeEffect.CAN_LOAD);
+            yield return new WaitUntil(() => m_LoadingFadeEffect.CAN_LOAD);
+            Debug.Log($"LoadingSceneManager-Loading-started-CAN_LOAD:{m_LoadingFadeEffect.CAN_LOAD}");
 
             if (isNetworkSessionActive)
             {

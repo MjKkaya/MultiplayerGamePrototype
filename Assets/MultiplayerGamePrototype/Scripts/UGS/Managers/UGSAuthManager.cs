@@ -82,7 +82,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 else
                     return false;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Debug.Log($"UGSManager-InitializeUnityServiceAsync-ex:{ex}");
                 return false;

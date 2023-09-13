@@ -1,0 +1,25 @@
+:root 
+{
+  	--scale-from: 0.9;
+  	--scale-to: 1;
+    --color-from: rgba(0, 0, 0, 0);
+  	--color-to: rgba(0, 0, 0, 1);
+}
+
+
+.fade-effect__transition {
+    transition-duration: 0.75s;
+    transition-timing-function: ease-in-sine;
+    transition-property: scale, background-color;
+    scale: var(--scale-from) var(--scale-from);
+}
+
+.fade-effect__transition--fade-in {
+    background-color: var(--color-to);
+    scale: var(--scale-to) var(--scale-to);
+}
+
+.fade-effect__transition--fade-out {
+    background-color: var(--color-from);
+    scale:  var(--scale-from) var(--scale-from);
+}

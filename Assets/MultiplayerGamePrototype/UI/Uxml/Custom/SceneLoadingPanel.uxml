@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/MultiplayerGamePrototype/UI/Uss/BackgroundFadeInFadeOut.uss?fileID=7433441132597879392&amp;guid=bae55b918e6ed456190b1e60cbace631&amp;type=3#BackgroundFadeInFadeOut" />
+    <ui:VisualElement name="element__background" class="fade-effect__transition" style="flex-grow: 1;" />
+</ui:UXML>

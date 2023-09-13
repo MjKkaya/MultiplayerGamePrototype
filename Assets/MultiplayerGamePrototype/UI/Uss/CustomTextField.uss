@@ -1,0 +1,30 @@
+.unity-base-text-field__input{
+    background-color: rgba(255, 0, 0, 0);
+    border-color: rgba(255, 0, 0, 0);
+    font-size: 62px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}
+
+
+.unity-base-text-field__input--placeholder {
+    color: rgba(75, 75, 75, 0.7);
+    font-size: 55px;
+    -unity-font-style: italic;
+    -unity-text-align: middle-left;
+}
+
+
+
+.ContainerCustomTextField {
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    background-color: rgb(255, 255, 255);
+    width: 750px;
+    height: 125px;
+}
+
+
