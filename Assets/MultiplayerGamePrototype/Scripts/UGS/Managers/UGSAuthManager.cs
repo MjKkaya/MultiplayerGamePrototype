@@ -1,4 +1,5 @@
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.Events;
 using MultiplayerGamePrototype.Utilities;
 using System;
 using System.Threading.Tasks;
@@ -11,8 +12,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSAuthManager : SingletonMonoPersistent<UGSAuthManager>
     {
-        public static event Action ActionOnCompletedSignIn;
-
         private static string m_MyPlayerId;
         public static string MyPlayerId => m_MyPlayerId;
 
@@ -20,14 +19,21 @@ namespace MultiplayerGamePrototype.UGS.Managers
         public static string MyUsername => m_MyUsername;
 
 
-        public async Task<bool> SignInAnonymouslyAsync(string username)
+        public override void Awake()
+        {
+            base.Awake();
+            AuthenticaitonEvents.SignInAnonymously += AuthenticaitonEvents_SignInAnonymously;
+        }
+
+
+        private async void SignInAnonymouslyAsync(string username)
         {
             m_MyUsername = username;
             bool isInitialized = await InitializeUnityServiceAsync(username);
 
             Debug.Log($"UGSAuthManager-SignInAnonymouslyAsync-isInitialized:{isInitialized}");
             if (!isInitialized)
-                return false;
+                AuthenticaitonEvents.OnFailedSignedIn?.Invoke();
 
             try
             {
@@ -35,22 +41,20 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 if(AuthenticationService.Instance.IsSignedIn)
                 {
                     OnSignedIn();
-                    return true;
                 }
 
-                SetupEvents(true);
+                SubscribeToUGSEvents();
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                return true;
             }
             catch (AuthenticationException ex)
             {
                 Debug.Log($"UGSAuthManager-SignInAnonymouslyAsync-ex:{ex}");
-                return false;
+                AuthenticaitonEvents.OnFailedSignedIn?.Invoke();
             }
             catch (RequestFailedException exception)
             {
                 Debug.Log($"UGSAuthManager-SignInAnonymouslyAsync-exception:{exception}");
-                return false;
+                AuthenticaitonEvents.OnFailedSignedIn?.Invoke();
             }
         }
 
@@ -69,9 +73,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 else
                 {
                     InitializationOptions initializationOptions = new();
-                    //This restrict is doing at username's input field!
-                    //Regex rgx = new Regex("[^a-zA-Z0-9 - _]");
-                    //profileName = rgx.Replace(profileName, "");
                     initializationOptions.SetProfile(profileName);
                     await UnityServices.InitializeAsync(initializationOptions);
                 }
@@ -89,21 +90,21 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
         
-        private void SetupEvents(bool isActive)
+        private void SubscribeToUGSEvents()
         {
             if (UnityServices.State != ServicesInitializationState.Initialized)
                 return;
+            AuthenticationService.Instance.SignedIn += OnSignedIn;
+            AuthenticationService.Instance.SignInFailed += OnSignInFailed;
+        }
 
-            if (isActive)
-            {
-                AuthenticationService.Instance.SignedIn += OnSignedIn;
-                AuthenticationService.Instance.SignInFailed += OnSignInFailed;
-            }
-            else
-            {
-                AuthenticationService.Instance.SignedIn -= OnSignedIn;
-                AuthenticationService.Instance.SignInFailed -= OnSignInFailed;
-            }
+        private void UnsubscribeFromUGSEvents()
+        {
+            
+            if (UnityServices.State != ServicesInitializationState.Initialized)
+                return;
+            AuthenticationService.Instance.SignedIn -= OnSignedIn;
+            AuthenticationService.Instance.SignInFailed -= OnSignInFailed;
         }
 
 
@@ -111,9 +112,14 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            SetupEvents(false);
+            AuthenticaitonEvents.SignInAnonymously -= AuthenticaitonEvents_SignInAnonymously;
+            UnsubscribeFromUGSEvents();
         }
 
+        private void AuthenticaitonEvents_SignInAnonymously(string username)
+        {
+            SignInAnonymouslyAsync(username);
+        }
 
         #region AuthenticationService Events
 
@@ -122,12 +128,13 @@ namespace MultiplayerGamePrototype.UGS.Managers
             m_MyPlayerId = AuthenticationService.Instance.PlayerId;
             Debug.Log($"UGSAuthManager-OnSignedIn-MyPlayerId:{MyPlayerId}");
             PlayerPrefsManager.Singleton.SetString(PlayerPrefsManager.PLAYER_USERNAME_KEY, m_MyUsername);
-            ActionOnCompletedSignIn?.Invoke();
+            AuthenticaitonEvents.OnCompletedSignedIn?.Invoke();
         }
 
         private void OnSignInFailed(RequestFailedException requestFailedException)
         {
             Debug.Log($"UGSAuthManager-OnSignInFailed:{requestFailedException}");
+            AuthenticaitonEvents.OnFailedSignedIn?.Invoke();
         }
 
         #endregion

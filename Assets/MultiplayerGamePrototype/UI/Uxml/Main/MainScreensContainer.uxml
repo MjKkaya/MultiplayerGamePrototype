@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="main-screen" src="project://database/Assets/MultiplayerGamePrototype/UI/Uxml/Main/main-screen.uxml?fileID=9197481963319205126&amp;guid=2b7f13c14208949a1b234ff5d1b17efa&amp;type=3#main-screen" />
+    <ui:Template name="join-lobby-screen" src="project://database/Assets/MultiplayerGamePrototype/UI/Uxml/Main/join-lobby-screen.uxml?fileID=9197481963319205126&amp;guid=58bf0cb5c909943f88ab6a08d8b3e40e&amp;type=3#join-lobby-screen" />
+    <ui:Template name="create-lobby-screen" src="project://database/Assets/MultiplayerGamePrototype/UI/Uxml/Main/create-lobby-screen.uxml?fileID=9197481963319205126&amp;guid=3451f8ac4b89f45f0984ffb48eef3000&amp;type=3#create-lobby-screen" />
+    <Style src="project://database/Assets/MultiplayerGamePrototype/UI/Uss/CustomMainButton.uss?fileID=7433441132597879392&amp;guid=f90693c3841e44a7097525baf59e0188&amp;type=3#CustomMainButton" />
+    <Style src="project://database/Assets/MultiplayerGamePrototype/UI/Uss/ScreenContainerItems.uss?fileID=7433441132597879392&amp;guid=336ae903408e7485e9686a9d7efd52bd&amp;type=3#ScreenContainerItems" />
+    <ui:Instance template="main-screen" name="main-screen" class="screen-position" />
+    <ui:Instance template="join-lobby-screen" name="join-lobby-screen" class="screen-position" />
+    <ui:Instance template="create-lobby-screen" name="create-lobby-screen" class="screen-position" />
+</ui:UXML>

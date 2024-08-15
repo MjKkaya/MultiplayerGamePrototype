@@ -1,0 +1,6 @@
+.screen-base {
+    align-items: center;
+    background-color: rgba(48, 49, 55, 0.88);
+    flex-grow: 1;
+    justify-content: center;
+}

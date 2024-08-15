@@ -6,6 +6,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using System.Threading.Tasks;
+using MultiplayerGamePrototype.Events;
 
 
 namespace MultiplayerGamePrototype.UGS.Managers
@@ -28,8 +29,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
         public override void Awake()
         {
             base.Awake();
-            UGSLobbyManager.ActionOnCreatedLobby += OnCreatedLobby;
-            UGSLobbyManager.ActionOnJoinedLobby += OnJoinedLobby;
+            LobbyEvents.OnCompletedCreation += LobbyEvents_OnCompletedCreation;
+            LobbyEvents.OnCompletedJoin += LobbyEvents_OnCompletedJoin;
             UGSLobbyManager.ActionOnChangedRelayJoinCode += OnChangedRelayJoinCode;
         }
 
@@ -84,12 +85,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         #region Events
 
-        private async void OnCreatedLobby(int maxPlayers)
+        private async void LobbyEvents_OnCompletedCreation(int maxPlayers)
         {
             await AllocateRelayServerAndGetJoinCode(maxPlayers);
         }
 
-        private void OnJoinedLobby()
+        private void LobbyEvents_OnCompletedJoin()
         {
             if (!UGSLobbyManager.Singleton.AmIhost)
                 JoinAllocationAsync(UGSLobbyDataController.GetLobbyData(UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE));
@@ -108,8 +109,9 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            UGSLobbyManager.ActionOnCreatedLobby -= OnCreatedLobby;
-            UGSLobbyManager.ActionOnJoinedLobby -= OnJoinedLobby;
+            LobbyEvents.OnCompletedCreation -= LobbyEvents_OnCompletedCreation;
+            LobbyEvents.OnCompletedJoin -= LobbyEvents_OnCompletedJoin;
+            UGSLobbyManager.ActionOnChangedRelayJoinCode -= OnChangedRelayJoinCode;
         }
 
         #endregion

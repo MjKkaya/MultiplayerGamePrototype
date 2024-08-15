@@ -16,3 +16,10 @@
     color: rgb(255, 255, 255);
     overflow: hidden;
 }
+
+.custom-close-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 250px;
+}

@@ -1,18 +1,17 @@
-using Cinemachine;
 using MultiplayerGamePrototype.ScriptableObjects;
 using MultiplayerGamePrototype.Gameplay;
 using StarterAssets;
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 
 namespace MultiplayerGamePrototype.Players
 {
     public class NOPlayerFPSController : MonoBehaviour
     {
-        [SerializeField] private CinemachineVirtualCamera m_CinemachineVirtualCamera;
+        [SerializeField] private CinemachineCamera _cinemachineCamera;
         [SerializeField] private UICanvasControllerInput m_UICanvasControllerInput;
         [SerializeField] private MobileDisableAutoSwitchControls m_MobileDisableAutoSwitchControls;
         [SerializeField] private SOGameData m_SOGameData;
@@ -27,7 +26,7 @@ namespace MultiplayerGamePrototype.Players
         /// <param name="starterAssetsInputs">For FPS charceter inputs</param>
         public void SetPlayer(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
         {
-            m_CinemachineVirtualCamera.Follow = followingObject;
+            _cinemachineCamera.Follow = followingObject;
             m_UICanvasControllerInput.starterAssetsInputs = starterAssetsInputs;
             m_PlayerInput = playerInput;
 #if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)

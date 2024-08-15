@@ -1,3 +1,4 @@
+using MultiplayerGamePrototype.Events;
 using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UIToolkit.Utilities;
 using MultiplayerGamePrototype.Utilities;
@@ -20,7 +21,7 @@ namespace MultiplayerGamePrototype.Core
     };
 
 
-    public class LoadingSceneManager : SingletonMonoPersistent<LoadingSceneManager>
+    public class SceneLoadingManager : SingletonMonoPersistent<SceneLoadingManager>
     {
         public static event Action<ulong> ActionOnLoadClientGameplaySceneComplete;
 
@@ -33,7 +34,7 @@ namespace MultiplayerGamePrototype.Core
         public override void Awake()
         {
             base.Awake();
-            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
+            NetworkManagerEvents.OnServerStarted += NetworkManagerEvents_OnServerStarted;
         }
 
         public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
@@ -182,14 +183,15 @@ namespace MultiplayerGamePrototype.Core
 
         #region Events
 
-        private void OnStartedServer()
+        private void NetworkManagerEvents_OnServerStarted()
         {
             SubscribeSceneManager();
+            LoadScene(SceneName.Lobby);
         }
 
         private void OnDestroy()
         {
-            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
+            NetworkManagerEvents.OnServerStarted -= NetworkManagerEvents_OnServerStarted;
             UnsubscribeNetworkManager();
             
         }

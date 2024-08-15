@@ -1,4 +1,5 @@
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.Events;
 using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.Utilities;
 using System;
@@ -14,11 +15,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
 {
     public class UGSLobbyManager : SingletonMonoPersistent<UGSLobbyManager>
     {
-        private static readonly int LOBBY_MAX_PLAYERS = 10;
+        private static readonly int LOBBY_MAX_PLAYERS = 2;
 
         public static event Action<List<string>> ActionOnPlayerJoined;
-        public static event Action<int> ActionOnCreatedLobby;
-        public static event Action ActionOnJoinedLobby;
+        // public static event Action<int> ActionOnCreatedLobby;
+        // public static event Action ActionOnJoinedLobby;
         public static event Action ActionOnChangedMyPlayerData;
         public static event Action ActionOnChangedGameBulletModeData;
         public static event Action<string, string> ActionOnChangedPlayersStatData;
@@ -73,8 +74,12 @@ namespace MultiplayerGamePrototype.UGS.Managers
             Debug.Log("UGSLobbyManager-Awake");
             base.Awake();
             m_LobbyEventCallbacks = new LobbyEventCallbacks();
-            UGSNetworkManager.ActionOnServerStarted += OnStartedServer;
-            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
+            NetworkManagerEvents.OnServerStarted += NetworkManagerEvents_OnServerStarted;
+            SceneLoadingManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
+            LobbyEvents.Create += LobbyEvents_Create;
+            LobbyEvents.Join += LobbyEvents_Join;
+            LobbyEvents.QuickJoin += LobbyEvents_QuickJoin;
+            LobbyEvents.Leave += LobbyEvents_Leave;
         }
 
 
@@ -162,47 +167,28 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
+
         #region LobbyService Methods
 
-        //public async Task<List<Lobby>> GetLobbyListAsync()
-        //public async Task GetLobbyListAsync()
-        //{
-        //    QueryResponse queryResponse;
-        //    List<Lobby> lobblist;
-        //    try
-        //    {
-        //        queryResponse = await Lobbies.Instance.QueryLobbiesAsync();
-        //        lobblist = queryResponse.Results;
-        //        Debug.Log($"UGSLobbyManager-GetLobbyListAsync-Count: {lobblist.Count}");
-        //    }
-        //    catch (LobbyServiceException e)
-        //    {
-        //        Debug.Log(e);
-        //        lobblist = null;
-        //    }
-        //    //return lobblist;
-        //}
-
-        public async Task<bool> CreateLobbyAsync()
+        private async void CreateLobbyAsync(string lobbyName)
         {
             try
             {
-                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync("Lobby-1", LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(UGSAuthManager.MyUsername));
+                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, LOBBY_MAX_PLAYERS, UGSLobbyDataController.CreateBaseLobbyData(UGSAuthManager.MyUsername));
                 Debug.Log($"UGSLobbyManager-CreateLobbyAsync-LobbyId:{m_CurrentLobby.Id}, LobbyCode:{m_CurrentLobby.LobbyCode}");
                 await BindLobby(m_CurrentLobby.Id);
                 m_HeartbeatLobbyCoroutine = StartCoroutine(HeartbeatLobbyCoroutine(m_CurrentLobby.Id, 15));
-                ActionOnCreatedLobby?.Invoke(LOBBY_MAX_PLAYERS);
-                ActionOnJoinedLobby?.Invoke();
-                return true;
+                LobbyEvents.OnCompletedCreation?.Invoke(LOBBY_MAX_PLAYERS);
+                LobbyEvents.OnCompletedJoin?.Invoke();
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"UGSLobbyManager-CreateLobbyAsync-ex:{ex}");
-                return false;
+                LobbyEvents.OnFailedCreation?.Invoke();
             }
         }
 
-        public async Task<bool> QuickJoinLobbyAsync()
+        public async void QuickJoinLobbyAsync()
         {
             try
             {
@@ -217,50 +203,19 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
                 m_CurrentLobby = await LobbyService.Instance.QuickJoinLobbyAsync(quickJoinLobbyOptions);
                 await BindLobby(m_CurrentLobby.Id);
-                ActionOnJoinedLobby?.Invoke();
-                return true;
+                // ActionOnJoinedLobby?.Invoke();
+                LobbyEvents.OnCompletedJoin?.Invoke();
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"UGSLobbyManager-QuickJoinOrCreate-ex:{ex}");
-                return false;
+                LobbyEvents.OnFailedJoin?.Invoke();
             }
         }
 
-        /*public async Task<bool> QuickJoinLobbyAsync(string username)
-        {
-            try
-            {
-                QuickJoinLobbyOptions options = new()
-                {
-                    Player = UGSLobbyDataController.CreateLobbyPlayer(username),
-                    //Filter = new List<QueryFilter>
-                    //{
-                    //    new QueryFilter(
-                    //            field: QueryFilter.FieldOptions.AvailableSlots,
-                    //            value: "0",
-                    //            op: QueryFilter.OpOptions.GT)
-                    //}
-                };
+        
 
-                m_CurrentLobby = await Lobbies.Instance.QuickJoinLobbyAsync();
-                Debug.Log($"UGSLobbyManager-QuickJoinLobbyAsync-m_CurrentLobby: {m_CurrentLobby.Id}");
-                await BindLobby(m_CurrentLobby.Id);
-                ActionOnJoinedLobby?.Invoke();
-                return true;
-            }
-            catch (System.Exception ex)
-            {
-                Debug.Log($"UGSLobbyManager-QuickJoinLobbyAsync-ex: {ex}");
-                return false;
-            }
-            //finally
-            //{
-            //    return false;
-            //}
-        }*/
-
-        public async Task<bool> JoinLobbyByCodeAsync(string lobbyCode)
+        private async void JoinLobbyByCodeAsync(string lobbyCode)
         {
             try
             {
@@ -271,13 +226,13 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, options);
                 await BindLobby(m_CurrentLobby.Id);
-                ActionOnJoinedLobby?.Invoke();
-                return true;
+                // ActionOnJoinedLobby?.Invoke();
+                LobbyEvents.OnCompletedJoin?.Invoke();
             }
             catch (LobbyServiceException e)
             {
                 Debug.Log($"UGSLobbyManager-JoinLobbyByCodeAsync-ex: {e}");
-                return false;
+                LobbyEvents.OnFailedJoin?.Invoke();
             }
         }
 
@@ -332,7 +287,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public async void RemovePlayerAsync(string playerId)
+        private async void RemovePlayerAsync(string playerId)
         {
             try
             {
@@ -432,9 +387,9 @@ namespace MultiplayerGamePrototype.UGS.Managers
         //  When Host joined the "Relay Server" that "Relay Server"'s join code must be share to other joined players.
         /// </summary>
         /// <param name="relayJoinCode"></param>
-        private async void OnStartedServer()
+        private async void NetworkManagerEvents_OnServerStarted()
         {
-            Debug.Log("UGSLobbyManager-OnStartedServer");
+            Debug.Log("UGSLobbyManager-NetworkManagerEvents_OnServerStarted");
             await UpdateLobbyDataAsync(UGSLobbyDataController.CreateInitialData(UGSRelayManager.Singleton.JoinCode));
         }
 
@@ -449,7 +404,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnApplicationQuit()
         {
-            if (m_CurrentLobby != null && LoadingSceneManager.Singleton.IsCurrentSceneSame(SceneName.Lobby))
+            if (m_CurrentLobby != null && SceneLoadingManager.Singleton.IsCurrentSceneSame(SceneName.Lobby))
             {
                 try
                 {
@@ -465,9 +420,37 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         private void OnDestroy()
         {
-            UGSNetworkManager.ActionOnServerStarted -= OnStartedServer;
-            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
+            LobbyEvents.Create -= LobbyEvents_Create;
+            LobbyEvents.Join -= LobbyEvents_Join;
+            LobbyEvents.QuickJoin -= LobbyEvents_QuickJoin;
+            LobbyEvents.Leave -= LobbyEvents_Leave;
+            NetworkManagerEvents.OnServerStarted -= NetworkManagerEvents_OnServerStarted;
+            SceneLoadingManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
         }
+
+        private void LobbyEvents_Create(string lobbyName)
+        {
+            CreateLobbyAsync(lobbyName);
+        }
+
+        private void LobbyEvents_Join(string lobbyName)
+        {
+            JoinLobbyByCodeAsync(lobbyName);
+        }
+
+        private void LobbyEvents_QuickJoin()
+        {
+            QuickJoinLobbyAsync();
+        }
+
+        private void LobbyEvents_Leave(string playerId)
+        {
+            RemovePlayerAsync(playerId);
+        }
+
+    
+
+
 
         #region Lobby Events
 
@@ -579,7 +562,10 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log($"UGSLobbyManager-OnLobbyEventConnectionStateChanged:{connectionState}, m_CurrentLobby:{m_CurrentLobby}");
             if(connectionState == LobbyEventConnectionState.Unsubscribed)
+            {
                 UnsubscribeLobby();
+                LobbyEvents.OnLeft?.Invoke();
+            }
         }
 
         #endregion

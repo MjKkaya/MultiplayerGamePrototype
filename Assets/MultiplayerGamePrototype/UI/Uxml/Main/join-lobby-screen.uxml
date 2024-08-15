@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="CustomTextField" src="project://database/Assets/MultiplayerGamePrototype/UI/Uxml/Custom/CustomTextField.uxml?fileID=9197481963319205126&amp;guid=960f583fa77bc49d497ca3bc96c23d56&amp;type=3#CustomTextField" />
+    <Style src="project://database/Assets/MultiplayerGamePrototype/UI/Uss/UIScreenBase.uss?fileID=7433441132597879392&amp;guid=8042f9e2d54af40df9206e5a519d4101&amp;type=3#UIScreenBase" />
+    <ui:VisualElement name="join-lobby-screen" class="screen-base">
+        <ui:Instance template="CustomTextField" name="lobby-name-textfield" />
+        <ui:Button text="Join Lobby" display-tooltip-when-elided="true" name="join-button" class="custom-main-button" />
+        <ui:Button text="Close" display-tooltip-when-elided="true" name="close-button" class="custom-main-button custom-close-button" />
+    </ui:VisualElement>
+</ui:UXML>

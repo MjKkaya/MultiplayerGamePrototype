@@ -1,5 +1,5 @@
 using MultiplayerGamePrototype.Core;
-using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.Events;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,107 +8,89 @@ using UnityEngine.UIElements;
 public class BootstrapScreen : MonoBehaviour
 {
     // string IDs
-    private const string k_InitializeElement = "menu__initialize__element";
-    private const string k_SingInElement = "menu__sing-in__element";
-    private const string k_UsernameTextField = "menu__username__text";
-    private const string k_SignInButton = "menu__sign-in__button";
+    private const string _initializeElementName = "menu__initialize__element";
+    private const string _singInElementName = "menu__sing-in__element";
+    private const string _usernameTextFieldName = "custom-textfield";
+    private const string _signInButtonName = "menu__sign-in__button";
 
-    private VisualElement m_Root;
-    private TextField m_UsernameTextField;
-    private Button m_SignInButton;
-    private VisualElement m_InitializeElement;
-    private VisualElement m_SingInElement;
+    private VisualElement _rootElement;
+    private TextField _usernameTextField;
+    private Button _signInButton;
+    private VisualElement _initializeElement;
+    private VisualElement _singInElement;
 
 
     private void Awake()
     {
-        Init();
+        Initialize();
     }
 
     private void OnDestroy()
     {
-        UGSAuthManager.ActionOnCompletedSignIn -= OnCompletedSignIn;
-        //if(m_SignInButton != null)
-        //    m_SignInButton.RegisterCallback<ClickEvent>(OnClickedSingInButton);
+         AuthenticaitonEvents.OnCompletedSignedIn -= AuthenticaitonEvents_OnComplatedSignedIn;
+        AuthenticaitonEvents.OnFailedSignedIn -= AuthenticaitonEvents_OnFailedSignedIn;
+        if(_signInButton != null)
+           _signInButton.RegisterCallback<ClickEvent>(OnClickedSingInButton);
     }
 
     private void Start()
     {
-        Debug.Log("BootstrapScreen-Start");
         Invoke(nameof(ShowSingInPanel), 0.75f);
     }
 
-    private void Init()
+    private void Initialize()
     {
-        Debug.Log($"BootstrapScreen-Init-Singleton:{Unity.Netcode.NetworkManager.Singleton}");
-        UGSAuthManager.ActionOnCompletedSignIn += OnCompletedSignIn;
-        m_Root = GetComponent<UIDocument>().rootVisualElement;
+        AuthenticaitonEvents.OnCompletedSignedIn += AuthenticaitonEvents_OnComplatedSignedIn;
+        AuthenticaitonEvents.OnFailedSignedIn += AuthenticaitonEvents_OnFailedSignedIn;
+        _rootElement = GetComponent<UIDocument>().rootVisualElement;
         SetVisualElements();
     }
 
 
     private void SetVisualElements()
     {
-        m_InitializeElement = m_Root.Q<VisualElement>(k_InitializeElement);
-        m_InitializeElement.style.display = DisplayStyle.Flex;
-        m_SingInElement = m_Root.Q<VisualElement>(k_SingInElement);
-        m_SingInElement.style.display = DisplayStyle.None;
-
-        m_UsernameTextField = m_Root.Q<TextField>(k_UsernameTextField);
-        m_SignInButton = m_Root.Q<Button>(k_SignInButton);
-
-        m_SignInButton.RegisterCallback<ClickEvent>(OnClickedSingInButton);
-        //m_SignInButton.clicked += OnClickedSingInButton;
-        Debug.Log("BootstrapScreen-SetVisualElements");
+        _initializeElement = _rootElement.Q<VisualElement>(_initializeElementName);
+        _initializeElement.style.display = DisplayStyle.Flex;
+        _singInElement = _rootElement.Q<VisualElement>(_singInElementName);
+        _singInElement.style.display = DisplayStyle.None;
+        _usernameTextField = _rootElement.Q<TextField>(_usernameTextFieldName);
+        _signInButton = _rootElement.Q<Button>(_signInButtonName);
+        _signInButton.RegisterCallback<ClickEvent>(OnClickedSingInButton);
     }
 
     private void ShowSingInPanel()
     {
-        m_UsernameTextField.value = PlayerPrefsManager.Singleton.GetString(PlayerPrefsManager.PLAYER_USERNAME_KEY, string.Empty);
-        m_InitializeElement.style.display = DisplayStyle.None;
-        m_SingInElement.style.display = DisplayStyle.Flex;
-        Debug.Log("BootstrapScreen-ShowSingInPanel");
+        _usernameTextField.value = PlayerPrefsManager.Singleton.GetString(PlayerPrefsManager.PLAYER_USERNAME_KEY, string.Empty);
+        _initializeElement.style.display = DisplayStyle.None;
+        _singInElement.style.display = DisplayStyle.Flex;
     }
 
-    private async void SignInAnonymouslyAsync()
+    private void SignInAnonymously()
     {
-        Debug.Log($"BootstrapScreen-SignInAnonymouslyAsync-UsernameTextField:{m_UsernameTextField.text}");
-
-        //m_SignInButton.pickingMode = PickingMode.Ignore;
-        //m_SignInButton.SetEnabled(false);
-
-        bool isSucceed = await UGSAuthManager.Singleton.SignInAnonymouslyAsync(m_UsernameTextField.text);
-        if (!isSucceed)
-        {
-            m_SignInButton.pickingMode = PickingMode.Position;
-            m_SignInButton.SetEnabled(true);
-        }
+        string username = _usernameTextField.text;
+        Debug.Log($"BootstrapScreen-SignInAnonymouslyAsync-username:{username}");
+        _signInButton.pickingMode = PickingMode.Ignore;
+        _signInButton.SetEnabled(false);
+        AuthenticaitonEvents.SignInAnonymously?.Invoke(username);
     }
 
     #region Events
 
-    private void OnCompletedSignIn()
+    private void AuthenticaitonEvents_OnComplatedSignedIn()
     {
-        Debug.Log("BootstrapScreen-OnCompletedSignIn");
-        LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
+        SceneLoadingManager.Singleton.LoadScene(SceneName.Main, false);
     }
 
-
-    #region Button Events
+    private void AuthenticaitonEvents_OnFailedSignedIn()
+    {
+        _signInButton.pickingMode = PickingMode.Position;
+        _signInButton.SetEnabled(true);
+    }
 
     private void OnClickedSingInButton(ClickEvent evt)
     {
-        Debug.Log("BootstrapScreen-OnClickedSingInButton");
-        SignInAnonymouslyAsync();
+        SignInAnonymously();
     }
-
-    //private void OnClickedSingInButton()
-    //{
-    //    Debug.Log("BootstrapScreen-OnClickedSingInButton-2");
-    //}
-
-    #endregion
-
 
     #endregion
 }

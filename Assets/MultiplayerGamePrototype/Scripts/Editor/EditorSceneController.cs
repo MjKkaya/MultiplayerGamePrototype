@@ -8,7 +8,7 @@ public class EditorSceneController
 {
     private static string m_lastOpenedScene;
 
-    [MenuItem("Scenes/Play Beginning Scene")]
+    [MenuItem("MultiplayerGamePrototype/Scene Control/Play Beginning Scene")]
     static void OpenBeginningScene()
     {
         if(!EditorApplication.isPlaying)
@@ -36,7 +36,7 @@ public class EditorSceneController
         }
     }
 
-    [MenuItem("Scenes/Stop-Back Working Scene")]
+    [MenuItem("MultiplayerGamePrototype/Scene Control/Stop and Go Back Last Scene")]
     static void StopBackScene()
     {
         if(EditorApplication.isPlaying)

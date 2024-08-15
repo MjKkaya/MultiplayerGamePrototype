@@ -13,6 +13,7 @@ using UnityEngine.UIElements;
 using StarterAssets;
 using UnityEngine.InputSystem;
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.Events;
 
 
 namespace MultiplayerGamePrototype.Gameplay
@@ -59,7 +60,7 @@ namespace MultiplayerGamePrototype.Gameplay
         public void Init()
         {
             Debug.Log("GameplayManager-Init");
-            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
+            SceneLoadingManager.ActionOnLoadClientGameplaySceneComplete += OnLoadClientGameplaySceneComplete;
         }
 
         public void HostPlayerSpawned()
@@ -86,8 +87,7 @@ namespace MultiplayerGamePrototype.Gameplay
         public void LeaveTheGame()
         {
             Debug.Log("GameplayManager-LeaveTheGame");
-            UGSLobbyManager.Singleton.RemovePlayerAsync(UGSAuthManager.MyPlayerId);
-            UGSNetworkManager.Singleton.Shutdown();
+            LobbyEvents.Leave?.Invoke(UGSAuthManager.MyPlayerId);
         }
 
 
@@ -201,7 +201,7 @@ namespace MultiplayerGamePrototype.Gameplay
         private void OnDestroy()
         {
             Debug.Log("GameManager-OnDestroy");
-            LoadingSceneManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
+            SceneLoadingManager.ActionOnLoadClientGameplaySceneComplete -= OnLoadClientGameplaySceneComplete;
             m_StarterAssetsInputAction.Dispose();
         }
 

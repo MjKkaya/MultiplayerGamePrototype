@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/MultiplayerGamePrototype/UI/Uss/CustomTextField.uss?fileID=7433441132597879392&amp;guid=7249c42145f364aedaece6203c1c5bc2&amp;type=3#CustomTextField" />
     <ui:VisualElement name="menu__container__custom-text-field" class="ContainerCustomTextField" style="width: 750px; height: 125px; margin-bottom: 20px;">
-        <ui:TextField name="menu__username__text" max-length="30" placeholder-text="Enter username..." class="CustomTextField" style="flex-grow: 1;" />
+        <ui:TextField name="custom-textfield" max-length="30" placeholder-text="type..." class="CustomTextField" style="flex-grow: 1;" />
     </ui:VisualElement>
 </ui:UXML>

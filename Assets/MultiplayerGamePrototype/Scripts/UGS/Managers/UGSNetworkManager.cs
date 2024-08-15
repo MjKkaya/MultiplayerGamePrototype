@@ -1,4 +1,5 @@
 using MultiplayerGamePrototype.Core;
+using MultiplayerGamePrototype.Events;
 using MultiplayerGamePrototype.Utilities;
 using System;
 using Unity.Netcode;
@@ -38,8 +39,6 @@ namespace MultiplayerGamePrototype.UGS.Managers
             }
         }
 
-        public static event Action ActionOnServerStarted;
-        public static event Action ActionOnClientStarted;
 
         private NetworkManager m_NetworkManager;
         private bool m_IsManuallyShutdown = false;
@@ -49,6 +48,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log("UGSNetworkManager-Awake");
             base.Awake();
+            LobbyEvents.OnLeft += LobbyEvents_OnLeft;
             m_NetworkManager = GetComponent<NetworkManager>();
             Debug.Log("UGSNetworkManager-Awake-2");
         }
@@ -63,7 +63,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         /// If host hutdown the server ActionOnShutdownServer method will trigger every other clients!
         /// Than they will start their own shutdown process.
         /// </summary>
-        public void Shutdown()
+        private void Shutdown()
         {
             Debug.Log("UGSNetworkManager-Shutdown");
             m_IsManuallyShutdown = true;
@@ -120,20 +120,20 @@ namespace MultiplayerGamePrototype.UGS.Managers
         private void OnServerStarted()
         {
             Debug.Log("UGSNetworkManager-OnServerStarted");
-            ActionOnServerStarted?.Invoke();
+            NetworkManagerEvents.OnServerStarted?.Invoke();
         }
 
         private void OnServerStopped(bool isHost)
         {
             Debug.Log($"UGSNetworkManager-OnServerStopped-isHost:{isHost}");
             SetCallbacks(false);
-            LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
+            SceneLoadingManager.Singleton.LoadScene(SceneName.Main, false);
         }
 
         private void OnClientStarted()
         {
             Debug.Log("UGSNetworkManager-OnClientStarted");
-            ActionOnClientStarted?.Invoke();
+            NetworkManagerEvents.OnClientStarted?.Invoke();
         }
 
         private void OnClientStopped(bool isHost)
@@ -143,11 +143,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
             {
                 SetCallbacks(false);
                 if(m_IsManuallyShutdown)
-                    LoadingSceneManager.Singleton.LoadScene(SceneName.Main, false);
+                    SceneLoadingManager.Singleton.LoadScene(SceneName.Main, false);
                 else
                 {
                     //ActionOnServerStoppedByHost?.Invoke();
-                    LoadingSceneManager.Singleton.LoadScene(SceneName.Lobby, false);
+                    SceneLoadingManager.Singleton.LoadScene(SceneName.Lobby, false);
                 }
             }
             m_IsManuallyShutdown = false;
@@ -163,11 +163,19 @@ namespace MultiplayerGamePrototype.UGS.Managers
             Debug.Log($"UGSNetworkManager-OnClientDisconnectCallback-disconnectedClient:{disconnectedClient}, ServerClientId:{NetworkManager.ServerClientId}, LocalClientId:{m_NetworkManager.LocalClientId}");
         }
 
+        private void LobbyEvents_OnLeft()
+        {
+            Shutdown();
+        }
+
+
         private void OnDestroy()
         {
             Debug.Log("UGSNetworkManager-OnDestroy");
             if(m_NetworkManager != null)
                 SetCallbacks(false);
+
+            LobbyEvents.OnLeft -= LobbyEvents_OnLeft;
         }
 
         #endregion

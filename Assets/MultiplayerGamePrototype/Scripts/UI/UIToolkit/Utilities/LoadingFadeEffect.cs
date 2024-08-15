@@ -58,12 +58,11 @@ namespace MultiplayerGamePrototype.UIToolkit.Utilities
         private void OnEnable()
         {
             Debug.Log("LoadingFadeEffect-OnEnable");
-            //GetComponent<UIDocument>().rootVisualElement.dataSource = m_FadeEffectData;
+            GetComponent<UIDocument>().rootVisualElement.dataSource = m_FadeEffectData;
             m_BackgroundElement = GetComponent<UIDocument>().rootVisualElement.Q(k_BackgroundElement);
             m_BackgroundElement.pickingMode = PickingMode.Ignore;
-           
 
-            /*
+
             //Debug.Log("TTT:" + nameof(m_BackgroundElement.style.width)+ ","+ nameof(m_BackgroundElement.style.scale) + "," + nameof(m_BackgroundElement.transform.scale));
 
             //m_BackgroundElement.SetBinding(nameof(m_BackgroundElement.style.width), new DataBinding // not working!
@@ -92,7 +91,7 @@ namespace MultiplayerGamePrototype.UIToolkit.Utilities
                 dataSourcePath = new PropertyPath(nameof(m_FadeEffectData.AnimationTimeList)),
                 bindingMode = BindingMode.ToTarget
             });
-            */
+            
         }
 
         private void OnDisable()
@@ -104,6 +103,8 @@ namespace MultiplayerGamePrototype.UIToolkit.Utilities
         //todo:test-delete 
         private void Update()
         {
+            return;
+
             if (Keyboard.current.iKey.wasPressedThisFrame)
                 FadeIn();
             else if (Keyboard.current.oKey.wasPressedThisFrame)
@@ -148,7 +149,7 @@ namespace MultiplayerGamePrototype.UIToolkit.Utilities
         }
 
         // Start a complete fade effect
-        public void FadeAll()
+        private void FadeAll()
         {
             Debug.Log("LoadingFadeEffect-FadeAll");
             m_IsLoop = true;
@@ -175,10 +176,15 @@ namespace MultiplayerGamePrototype.UIToolkit.Utilities
                     FadeOut();
                 }
                 else
+                {
                     m_FadeMode = FadeMode.None;
+                    m_BackgroundElement.pickingMode = PickingMode.Ignore;
+                }
+
             }
-            else if(m_FadeMode == FadeMode.In)
+            else if(m_FadeMode == FadeMode.Out)
             {
+                m_FadeMode = FadeMode.None;
                 m_BackgroundElement.pickingMode = PickingMode.Ignore;
             }
         }
