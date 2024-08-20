@@ -267,19 +267,42 @@ namespace MultiplayerGamePrototype.UGS.DataControllers
             return score;
         }
 
-        public static UpdateLobbyOptions IncreasePlayerScoreStat(string playerId, int additionScore)
+        public static int CalculatePlayerScoreData(string playerId, int additionScore)
         {
             int score = GetPlayerScoreStat(playerId);
-            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreStat-playerId:{playerId}, score:{score}, additionScore:{additionScore}");
+            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreData-playerId:{playerId}, score:{score}, additionScore:{additionScore}");
             score += additionScore;
-            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreStat-score:{score}");
-
-            UpdateLobbyOptions lobbyOptions = new()
-            {
-                Data = new Dictionary<string, DataObject> () { { playerId, new DataObject(DataObject.VisibilityOptions.Member, score.ToString()) } }
-            };
-
+            Debug.Log($"UGSLobbyDataController-IncreasePlayerScoreData-score:{score}");
+            return score;
+        }
+        public static UpdateLobbyOptions UpdatePlayerScoreData(string playerId, int newScore)
+        {
+            UpdateLobbyOptions lobbyOptions = CreateLobbyOptionForPlayerScoreData(playerId, newScore);
             return lobbyOptions;
+        }
+        
+        private static Dictionary<string, UpdateLobbyOptions> _lobbyOptionDataForPlayerScore = new();
+        private static UpdateLobbyOptions CreateLobbyOptionForPlayerScoreData(string playerId, int score)
+        {
+            if(_lobbyOptionDataForPlayerScore.ContainsKey(playerId))
+            {
+                UpdateLobbyOptions lobbyOptions = _lobbyOptionDataForPlayerScore[playerId];
+                lobbyOptions.Data[playerId] = new DataObject( visibility: DataObject.VisibilityOptions.Member, value: score.ToString());
+                return lobbyOptions;
+            }
+            else
+            {
+                UpdateLobbyOptions lobbyOptions = new()
+                {
+                    Data = new Dictionary<string, DataObject> () 
+                    { 
+                        { playerId, new DataObject( visibility: DataObject.VisibilityOptions.Member, value: score.ToString())  } 
+                    }
+                };
+
+                _lobbyOptionDataForPlayerScore.Add(playerId, lobbyOptions);
+                return lobbyOptions;
+            }
         }
 
         #endregion

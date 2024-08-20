@@ -22,7 +22,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
         // public static event Action ActionOnJoinedLobby;
         public static event Action ActionOnChangedMyPlayerData;
         public static event Action ActionOnChangedGameBulletModeData;
-        public static event Action<string, string> ActionOnChangedPlayersStatData;
+        // public static event Action<string, string> ActionOnChangedPlayersStatData;
         public static event Action ActionOnChangedHost;
         public static event Action ActionOnChangedRelayJoinCode;
 
@@ -87,14 +87,18 @@ namespace MultiplayerGamePrototype.UGS.Managers
         {
             Debug.Log($"UGSLobbyManager-BindLobby-lobbyID:{lobbyID}");
             m_LobbyEventCallbacks.LobbyChanged += OnLobbyChanged;
-            m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
+            m_LobbyEventCallbacks.DataAdded += OnDataAdded;
             m_LobbyEventCallbacks.DataChanged += OnDataChanged;
+            m_LobbyEventCallbacks.DataRemoved+= OnDataRemoved;
+            m_LobbyEventCallbacks.PlayerJoined += OnPlayerJoined;
             m_LobbyEventCallbacks.PlayerLeft += OnPlayerLeft;
             m_LobbyEventCallbacks.LobbyDeleted += OnLobbyDeleted;
             m_LobbyEventCallbacks.KickedFromLobby += OnKickedFromLobby;
             m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
             ILobbyEvents lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
+
+       
 
         public Player GetPlayer(string playerId)
         {
@@ -209,7 +213,8 @@ namespace MultiplayerGamePrototype.UGS.Managers
             catch (Exception ex)
             {
                 Debug.LogWarning($"UGSLobbyManager-QuickJoinOrCreate-ex:{ex}");
-                LobbyEvents.OnFailedJoin?.Invoke();
+                // LobbyEvents.OnFailedQuickJoin?.Invoke();
+                CreateLobbyAsync("QuickJoin");
             }
         }
 
@@ -241,7 +246,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
             Debug.Log("UGSLobbyManager-UpdateLobbyDataAsync");
             try
             {
-                await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
+                m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
                 return true;
             }
             catch (Exception ex)
@@ -330,7 +335,7 @@ namespace MultiplayerGamePrototype.UGS.Managers
                     HostId = newHostId
                 };
 
-                await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
+                m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, lobbyOptions);
                 //StopHeartBeat();
                 return true;
             }
@@ -368,11 +373,11 @@ namespace MultiplayerGamePrototype.UGS.Managers
 
         IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float waitTimeSeconds)
         {
-            Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-lobbyId:{lobbyId}");
+            //Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-lobbyId:{lobbyId}");
             var delay = new WaitForSecondsRealtime(waitTimeSeconds);
             do
             {
-                Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-Continue-lobbyId:{lobbyId}");
+                //Debug.Log($"UGSLobbyManager-HeartbeatLobbyCoroutine-Continue-lobbyId:{lobbyId}");
                 LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
                 yield return delay;
             } while (m_CurrentLobby != null);
@@ -499,6 +504,53 @@ namespace MultiplayerGamePrototype.UGS.Managers
             ActionOnPlayerJoined?.Invoke(newPlayersId);
         }
 
+        
+
+        private void OnDataAdded(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> addedData)
+        {
+            string key;
+            string data;
+            Debug.Log($"UGSLobbyManager-OnDataAdded-Count:" + addedData.Count);
+            if (m_CurrentLobby == null)
+                return;
+
+            foreach (var item in addedData)
+            {
+                key = item.Key;
+                data = item.Value.Value.Value;
+                Debug.Log($"UGSLobbyManager-OnDataAdded-Key:{key}, data=> {data}");
+
+                if (key == UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR || key == UGSLobbyDataController.LOBBY_DATA_BULLET_SIZE)
+                {
+                    ActionOnChangedGameBulletModeData?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataAdded-LOBBY_DATA_RELAY_JOIN_CODE");
+                    ActionOnChangedRelayJoinCode?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_GAME_STATE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataAdded-LOBBY_DATA_GAME_STATE");
+                }
+                else
+                {
+                    if(AmIhost)
+                        continue;
+                    //for players score stats
+                    foreach (Player player in m_CurrentLobby.Players)
+                    {
+                        if (player.Id == key)
+                        {
+                            LobbyEvents.OnChangedPlayerScore?.Invoke(key, data);
+                            //ActionOnChangedPlayersStatData?.Invoke(key, data);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
 
         private void OnDataChanged(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> changedData)
         {
@@ -529,12 +581,60 @@ namespace MultiplayerGamePrototype.UGS.Managers
                 }
                 else
                 {
+                    if(AmIhost)
+                        continue;
                     //for players score stats
                     foreach (Player player in m_CurrentLobby.Players)
                     {
                         if (player.Id == key)
                         {
-                            ActionOnChangedPlayersStatData?.Invoke(key, data);
+                            LobbyEvents.OnChangedPlayerScore?.Invoke(key, data);
+                            //ActionOnChangedPlayersStatData?.Invoke(key, data);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void OnDataRemoved(Dictionary<string, ChangedOrRemovedLobbyValue<DataObject>> removedData)
+        {
+            string key;
+            string data;
+            Debug.Log($"UGSLobbyManager-OnDataRemoved-Count:" + removedData.Count);
+            if (m_CurrentLobby == null)
+                return;
+
+            foreach (var item in removedData)
+            {
+                key = item.Key;
+                data = item.Value.Value.Value;
+                Debug.Log($"UGSLobbyManager-OnDataRemoved-Key:{key}, data=> {data}");
+
+                if (key == UGSLobbyDataController.LOBBY_DATA_BULLET_COLOR || key == UGSLobbyDataController.LOBBY_DATA_BULLET_SIZE)
+                {
+                    ActionOnChangedGameBulletModeData?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_RELAY_JOIN_CODE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataRemoved-LOBBY_DATA_RELAY_JOIN_CODE");
+                    ActionOnChangedRelayJoinCode?.Invoke();
+                }
+                else if (key == UGSLobbyDataController.LOBBY_DATA_GAME_STATE)
+                {
+                    Debug.Log($"UGSLobbyManager-OnDataRemoved-LOBBY_DATA_GAME_STATE");
+                }
+                else
+                {
+                    if(AmIhost)
+                        continue;
+                    //for players score stats
+                    foreach (Player player in m_CurrentLobby.Players)
+                    {
+                        if (player.Id == key)
+                        {
+                            LobbyEvents.OnChangedPlayerScore?.Invoke(key, data);
+                            // ActionOnChangedPlayersStatData?.Invoke(key, data);
                             break;
                         }
                     }

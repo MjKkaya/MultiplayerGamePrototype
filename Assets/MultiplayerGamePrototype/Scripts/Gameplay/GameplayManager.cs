@@ -103,7 +103,7 @@ namespace MultiplayerGamePrototype.Gameplay
 
         #region Input Controls
 
-        public void SetInputs(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
+        public void SetInputs(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs, bool _isFirstPersonControllerActive)
         {
             m_StarterAssetsInputAction = new();
             m_StarterAssetsInputAction.Player.TooglePause.performed += OnTooglePausePlayer;
@@ -112,7 +112,7 @@ namespace MultiplayerGamePrototype.Gameplay
 
             m_PlayerInput = playerInput;
             m_PlayerInput.SwitchCurrentActionMap("Player");
-            m_FPSController.SetPlayer(followingObject, playerInput, starterAssetsInputs);
+            m_FPSController.SetPlayer(followingObject, playerInput, starterAssetsInputs, _isFirstPersonControllerActive);
         }
 
         private void OnTooglePausePlayer(InputAction.CallbackContext callbackContext)

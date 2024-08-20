@@ -467,6 +467,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cinemachineCamera: {fileID: 1820831473}
+  _cinemachineThirdPersonFollow: {fileID: 1820831475}
   m_UICanvasControllerInput: {fileID: 1489630050}
   m_MobileDisableAutoSwitchControls: {fileID: 1489630048}
   m_SOGameData: {fileID: 11400000, guid: e93ff046ea48e46b980e5509faeadde6, type: 2}
@@ -2471,6 +2472,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8762286023885395322, guid: 9c489a8547f4d9e4387da15a4ff82c81, type: 3}
   m_PrefabInstance: {fileID: 1820831472}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1820831475 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 828081898459585690, guid: 9c489a8547f4d9e4387da15a4ff82c81, type: 3}
+  m_PrefabInstance: {fileID: 1820831472}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625c14eee3ad46c99df7c7c891ef668a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1978223183
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,7 +16,7 @@ namespace MultiplayerGamePrototype.Gameplay.Targets
         [ClientRpc]
         public void HitClientRPC()
         {
-            Debug.Log($"{name}-HitClientRPC");
+            Debug.Log($"{name}-HitClientRPC-IsServer:{IsServer}");
             //todo: add particle effect
             if(IsServer)
             {

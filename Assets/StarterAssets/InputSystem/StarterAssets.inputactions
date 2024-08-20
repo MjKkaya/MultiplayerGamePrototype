@@ -300,7 +300,7 @@
                     "name": "TestBKey",
                     "type": "Button",
                     "id": "757fae8f-b89f-49ac-a438-6566e398f577",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false

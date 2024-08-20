@@ -6,6 +6,7 @@ using StarterAssets;
 using Unity.Netcode;
 using UnityEngine;
 using MultiplayerGamePrototype.UGS.Managers;
+using MultiplayerGamePrototype.Events;
 
 namespace MultiplayerGamePrototype.Players
 {
@@ -45,13 +46,15 @@ namespace MultiplayerGamePrototype.Players
         /// <summary>
         /// Host adds/decreases score for hitted target.
         /// </summary>
-        private async void GivePointForHitTarget()
+        private async void GivePointToPlayerForHitTarget()
         {
             string playerId = m_NOPlayer.PlayerId;
             bool isCorrectBullet = UGSLobbyDataController.IsPlayerBulletTypeEqualsToLobbyBulletType(playerId);
-            Debug.Log($"{name}-GivePointForHitTheTarget-PlayerId:{playerId}-isCorrectBullet:{isCorrectBullet}");
+            Debug.Log($"{name}-GivePointToPlayerForHitTarget-PlayerId:{playerId}-isCorrectBullet:{isCorrectBullet}");
             int score = isCorrectBullet ? m_SOGameData.HittingTargetScore : -m_SOGameData.HittingTargetScore;
-            await UGSLobbyManager.Singleton.UpdateLobbyDataAsync(UGSLobbyDataController.IncreasePlayerScoreStat(playerId, score));
+            int newScore = UGSLobbyDataController.CalculatePlayerScoreData(playerId, score);
+            await UGSLobbyManager.Singleton.UpdateLobbyDataAsync(UGSLobbyDataController.UpdatePlayerScoreData(playerId, newScore));
+            LobbyEvents.OnChangedPlayerScore?.Invoke(playerId, newScore.ToString());
         }
 
         #region RPC
@@ -67,7 +70,7 @@ namespace MultiplayerGamePrototype.Players
                 if(raycastHit.transform.TryGetComponent(out NOSimpleTarget target))
                 {
                     target.Hit();
-                    GivePointForHitTarget();
+                    GivePointToPlayerForHitTarget();
                 }
             }
         }

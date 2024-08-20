@@ -12,6 +12,7 @@ namespace MultiplayerGamePrototype.Players
     public class NOPlayerFPSController : MonoBehaviour
     {
         [SerializeField] private CinemachineCamera _cinemachineCamera;
+        [SerializeField] private CinemachineThirdPersonFollow _cinemachineThirdPersonFollow;
         [SerializeField] private UICanvasControllerInput m_UICanvasControllerInput;
         [SerializeField] private MobileDisableAutoSwitchControls m_MobileDisableAutoSwitchControls;
         [SerializeField] private SOGameData m_SOGameData;
@@ -24,7 +25,7 @@ namespace MultiplayerGamePrototype.Players
         /// </summary>
         /// <param name="transform">FPS character camera control</param>
         /// <param name="starterAssetsInputs">For FPS charceter inputs</param>
-        public void SetPlayer(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs)
+        public void SetPlayer(Transform followingObject, PlayerInput playerInput, StarterAssetsInputs starterAssetsInputs, bool _isFirstPersonControllerActive)
         {
             _cinemachineCamera.Follow = followingObject;
             m_UICanvasControllerInput.starterAssetsInputs = starterAssetsInputs;
@@ -33,19 +34,27 @@ namespace MultiplayerGamePrototype.Players
             m_MobileDisableAutoSwitchControls.playerInput = playerInput;
 #endif
             m_UICanvasControllerInput.gameObject.SetActive(true);
+
+            _cinemachineThirdPersonFollow.CameraDistance = _isFirstPersonControllerActive ? 0 : 4;
         }
 
         IEnumerator ImmobilizedCoroutine()
          {
-            m_PlayerInput.enabled = false;
+ #if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
+            m_UICanvasControllerInput.SetActiveInputs(false);
+            // m_MobileDisableAutoSwitchControls.playerInput.enabled = false;
+ #endif
+            // m_PlayerInput.enabled = false;
+            m_PlayerInput.DeactivateInput();
+
             yield return new WaitForSeconds(m_SOGameData.PlyaerImmobilizedTime);
-            m_PlayerInput.enabled = true;
- //#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
- //            m_MobileDisableAutoSwitchControls.playerInput.enabled = false;
- //            m_MobileDisableAutoSwitchControls.playerInput.enabled = true;
- //#else
- //            yield return null;
- //#endif
+
+            // m_PlayerInput.enabled = true;
+            m_PlayerInput.ActivateInput();
+ #if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
+            m_UICanvasControllerInput.SetActiveInputs(true);
+            // m_MobileDisableAutoSwitchControls.playerInput.enabled = true;
+ #endif
          }
         
         #region Events

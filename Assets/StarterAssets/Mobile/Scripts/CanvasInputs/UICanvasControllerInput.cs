@@ -8,26 +8,48 @@ namespace StarterAssets
         [Header("Output")]
         public StarterAssetsInputs starterAssetsInputs;
 
+        private bool _isInputAtive = true;
+
+        public void SetActiveInputs(bool isActive)
+        {
+            _isInputAtive = isActive;
+            // starterAssetsInputs.enabled = isActive;
+        }
+
         public void VirtualMoveInput(Vector2 virtualMoveDirection)
         {
-            starterAssetsInputs.MoveInput(virtualMoveDirection);
+            if(_isInputAtive)
+                starterAssetsInputs.MoveInput(virtualMoveDirection);
         }
 
         public void VirtualLookInput(Vector2 virtualLookDirection)
         {
-            starterAssetsInputs.LookInput(virtualLookDirection);
+            if(_isInputAtive)
+                starterAssetsInputs.LookInput(virtualLookDirection);
         }
 
         public void VirtualJumpInput(bool virtualJumpState)
         {
-            starterAssetsInputs.JumpInput(virtualJumpState);
+            if(_isInputAtive)
+                starterAssetsInputs.JumpInput(virtualJumpState);
         }
 
-        public void VirtualSprintInput(bool virtualSprintState)
+        // public void VirtualSprintInput(bool virtualSprintState)
+        // {
+            // if(_isInputAtive)
+        //     starterAssetsInputs.SprintInput(virtualSprintState);
+        // }
+
+        public void VirtualShotInput(bool virtualSprintState)
         {
-            starterAssetsInputs.SprintInput(virtualSprintState);
+            if(_isInputAtive)
+                starterAssetsInputs.ShotInput(virtualSprintState);
         }
-        
-    }
 
+        public void VirtualBombInput(bool virtualSprintState)
+        {
+            if(_isInputAtive)
+                starterAssetsInputs.BombInput(virtualSprintState);
+        }
+    }
 }

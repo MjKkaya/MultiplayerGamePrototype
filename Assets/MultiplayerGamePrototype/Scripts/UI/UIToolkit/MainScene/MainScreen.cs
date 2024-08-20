@@ -19,7 +19,7 @@ namespace MultiplayerGamePrototype.UI.UIToolkit.MainScene
 
         public MainScreen(VisualElement rootElement) : base(rootElement)
         {
-            LobbyEvents.OnFailedJoin += LobbyEvents_OnFailedJoin;
+            LobbyEvents.OnFailedCreation += LobbyEvents_OnFailedCreation;
             SetVisualElements();
             RegisterVisualElementsCallbacks();
         }
@@ -41,13 +41,23 @@ namespace MultiplayerGamePrototype.UI.UIToolkit.MainScene
 
         protected override void UnregisterVisualElementsCallbacks()
         {
+             _createButton.UnregisterCallback<ClickEvent>(OnClickedCreateButton);
+            _joinButton.UnregisterCallback<ClickEvent>(OnClickedJoinButton);
+            _quickJoinButton.UnregisterCallback<ClickEvent>(OnClickedQuickJoinButton);
         }
 
         public override void Disable()
         {
             base.Disable();
             UnregisterVisualElementsCallbacks();
-            LobbyEvents.OnFailedJoin -= LobbyEvents_OnFailedJoin;
+            LobbyEvents.OnFailedCreation -= LobbyEvents_OnFailedCreation;
+        }
+
+        private void SetEnabledAllButton(bool isEnable)
+        {
+            _createButton.SetEnabled(false);
+            _joinButton.SetEnabled(false);
+            _quickJoinButton.SetEnabled(false);
         }
 
 
@@ -63,13 +73,13 @@ namespace MultiplayerGamePrototype.UI.UIToolkit.MainScene
 
         private void OnClickedQuickJoinButton(ClickEvent evt)
         {
-            _quickJoinButton.SetEnabled(false);
+            SetEnabledAllButton(false);
             LobbyEvents.QuickJoin?.Invoke();
         }
 
-        private void LobbyEvents_OnFailedJoin()
+        private void LobbyEvents_OnFailedCreation()
         {
-            _quickJoinButton.SetEnabled(true);
+            SetEnabledAllButton(true);
         }
     }
 }

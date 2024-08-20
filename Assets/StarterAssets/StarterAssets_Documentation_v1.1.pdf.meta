@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1030fbd7379311b47bf5b1178c1c7a26
+guid: b5f957873a5b82042967195ffffc9063
 DefaultImporter:
   externalObjects: {}
   userData: 
@@ -7,8 +7,8 @@ DefaultImporter:
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 196525
-  packageName: Starter Assets - First Person Character Controller | URP
-  packageVersion: 1.2
+  productId: 196526
+  packageName: Starter Assets - Third Person Character Controller | URP
+  packageVersion: 1.1.5
   assetPath: Assets/StarterAssets/StarterAssets_Documentation_v1.1.pdf
-  uploadId: 562678
+  uploadId: 592926

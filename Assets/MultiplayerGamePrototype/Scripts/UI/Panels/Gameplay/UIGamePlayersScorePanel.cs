@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MultiplayerGamePrototype.Events;
 using MultiplayerGamePrototype.UGS.DataControllers;
 using MultiplayerGamePrototype.UGS.Managers;
 using MultiplayerGamePrototype.UI.Core;
@@ -24,7 +25,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         {
             base.Init();
             UGSLobbyManager.ActionOnPlayerJoined += OnPlayerJoined;
-            UGSLobbyManager.ActionOnChangedPlayersStatData += OnChangedPlayersStatData;
+            LobbyEvents.OnChangedPlayerScore += LobbyEvents_OnChangedPlayerScore;
             CreateStatItemsForAllLobbyPlayer();
         }
 
@@ -78,10 +79,11 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         }
 
         /// <summary>
-        /// Dictionary item has playerIds and new totol score.
+        /// When any player's score data changes, this method triggers! 
         /// </summary>
-        /// <param name="changedDataDict"></param>
-        private void OnChangedPlayersStatData(string playerId, string newScore)
+        /// <param name="playerId"></param>
+        /// <param name="newScore"></param>
+        private void LobbyEvents_OnChangedPlayerScore(string playerId, string newScore)
         {
             int playerScore = 0;
             int.TryParse(newScore, out playerScore);
@@ -96,7 +98,7 @@ namespace MultiplayerGamePrototype.UI.Panels.Gameplay
         private void OnDestroy()
         {
             UGSLobbyManager.ActionOnPlayerJoined -= OnPlayerJoined;
-            UGSLobbyManager.ActionOnChangedPlayersStatData -= OnChangedPlayersStatData;
+            LobbyEvents.OnChangedPlayerScore -= LobbyEvents_OnChangedPlayerScore;
         }
 
         #endregion

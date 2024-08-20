@@ -83,6 +83,7 @@ namespace StarterAssets
 
 		public void JumpInput(bool newJumpState)
 		{
+			Debug.Log("JumpInput-xxx");
 			jump = newJumpState;
 		}
 

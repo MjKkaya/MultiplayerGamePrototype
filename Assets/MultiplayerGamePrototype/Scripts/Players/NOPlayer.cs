@@ -20,10 +20,12 @@ namespace MultiplayerGamePrototype.Players
 
         private NetworkVariable<FixedString64Bytes> m_PlayerId = new NetworkVariable<FixedString64Bytes>(readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Owner);
 
-        [SerializeField] private Transform m_TransformPlayerCameraRoot;
-        [SerializeField] private StarterAssetsInputs m_StarterAssetsInputs;
-        [SerializeField] private PlayerInput m_PlayerInput;
-        [SerializeField] private FirstPersonController m_FirstPersonController;
+        [SerializeField] private Transform _transformPlayerCameraRoot;
+        [SerializeField] private StarterAssetsInputs _starterAssetsInputs;
+        [SerializeField] private PlayerInput _playerInput;
+        [SerializeField] private FirstPersonController _firstPersonController;
+        [SerializeField] private ThirdPersonController _thirdPersonController;
+        [SerializeField] private bool _isFirstPersonControllerActive;
 
 
         private void Awake()
@@ -54,9 +56,10 @@ namespace MultiplayerGamePrototype.Players
             m_PlayerId.Value = UGSAuthManager.MyPlayerId;
             name = $"Player-{username}";
             Debug.Log($"{name}-InitFPSControls");
-            m_FirstPersonController.enabled = true;
-            m_PlayerInput.enabled = true;
-            GameplayManager.Singleton.SetInputs(m_TransformPlayerCameraRoot, m_PlayerInput, m_StarterAssetsInputs);
+            _firstPersonController.enabled = _isFirstPersonControllerActive;
+            _thirdPersonController.enabled = !_isFirstPersonControllerActive;
+            _playerInput.enabled = true;
+            GameplayManager.Singleton.SetInputs(_transformPlayerCameraRoot, _playerInput, _starterAssetsInputs, _isFirstPersonControllerActive);
             if (IsServer)
                 GameplayManager.Singleton.HostPlayerSpawned();
         }
